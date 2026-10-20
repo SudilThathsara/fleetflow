@@ -1,13 +1,16 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI;
+// Fallback to cluster URI if not defined in env, and strip any accidental quotation marks added in Vercel dashboard
+let rawUri =
+  process.env.MONGODB_URI ||
+  'mongodb+srv://sudilthathsara19_db_user:JRekPIJDyPvd5rX9@cluster0.xqk8qbk.mongodb.net/fleetflow_db?retryWrites=true&w=majority';
 
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-}
+// Remove accidental surrounding single or double quotes
+const MONGODB_URI = rawUri.replace(/^["']|["']$/g, '').trim();
 
 /**
- * Global is used here to maintain a cached connection across hot reloads in development.
+ * Global is used here to maintain a cached connection across hot reloads in development
+ * and across serverless function invocations on Vercel.
  */
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -26,17 +29,21 @@ if (!global.mongooseCache) {
 }
 
 export async function connectDB(): Promise<typeof mongoose> {
-  if (cached.conn) {
+  // If already connected and ready, return existing connection
+  if (cached.conn && mongoose.connection.readyState === 1) {
     return cached.conn;
   }
 
   if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
+    const opts: mongoose.ConnectOptions = {
+      bufferCommands: true,
       maxPoolSize: 10,
+      serverSelectionTimeoutMS: 15000,
+      socketTimeoutMS: 45000,
+      family: 4, // CRITICAL FOR VERCEL: Force IPv4 as MongoDB Atlas M0 does not support IPv6 routing on AWS Lambda
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI as string, opts).then((mongooseInstance) => {
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
       return mongooseInstance;
     });
   }
