@@ -1,6 +1,14 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IDriverAdvance extends Document {
+export interface IAdvanceRepayment {
+  date: Date;
+  amount: number;
+  payrollMonth?: string;
+  notes?: string;
+}
+
+export interface IDriverAdvance {
+  _id?: any;
   advanceId: string;
   driver: mongoose.Types.ObjectId;
   driverName: string;
@@ -11,9 +19,21 @@ export interface IDriverAdvance extends Document {
   paymentMethod: 'Cash' | 'Bank Transfer' | 'Cheque';
   reason: string;
   status: 'Pending' | 'Approved' | 'Partially Applied' | 'Fully Applied';
-  createdAt: Date;
-  updatedAt: Date;
+  repayments?: IAdvanceRepayment[];
+  notes?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
+
+const AdvanceRepaymentSchema = new Schema<IAdvanceRepayment>(
+  {
+    date: { type: Date, default: Date.now },
+    amount: { type: Number, required: true },
+    payrollMonth: { type: String },
+    notes: { type: String },
+  },
+  { _id: false }
+);
 
 const DriverAdvanceSchema = new Schema<IDriverAdvance>(
   {
@@ -31,6 +51,8 @@ const DriverAdvanceSchema = new Schema<IDriverAdvance>(
       enum: ['Pending', 'Approved', 'Partially Applied', 'Fully Applied'],
       default: 'Approved',
     },
+    repayments: [AdvanceRepaymentSchema],
+    notes: { type: String },
   },
   { timestamps: true }
 );

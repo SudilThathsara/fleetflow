@@ -27,6 +27,8 @@ import {
   X,
   Bell,
   Search,
+  Package,
+  Calculator,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -39,20 +41,24 @@ interface SidebarItem {
 const navigationItems: SidebarItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Vehicles', href: '/vehicles', icon: Car, category: 'Fleet & Operations' },
+  { name: 'Companies & Projects', href: '/companies', icon: Building2, category: 'Fleet & Operations' },
+  { name: 'Annual Contracts & Rates', href: '/contracts', icon: FileCheck2, category: 'Fleet & Operations' },
   { name: 'Drivers', href: '/drivers', icon: UserCheck, category: 'Fleet & Operations' },
-  { name: 'Customers', href: '/customers', icon: Users, category: 'Fleet & Operations' },
-  { name: 'Owners & Suppliers', href: '/suppliers', icon: Building2, category: 'Fleet & Operations' },
-  { name: 'Bookings & Trips', href: '/bookings', icon: CalendarDays, category: 'Fleet & Operations' },
+  { name: 'External Owners & Suppliers', href: '/suppliers', icon: Users, category: 'Fleet & Operations' },
+  { name: 'Bookings & Daily/2-Day Hire', href: '/bookings', icon: CalendarDays, category: 'Fleet & Operations' },
   { name: 'Monthly Running Charts', href: '/running-charts', icon: FileSpreadsheet, category: 'Fleet & Operations' },
-  { name: 'Service & Maintenance', href: '/services', icon: Wrench, category: 'Maintenance' },
-  { name: 'Expiring Documents', href: '/documents', icon: FileText, category: 'Maintenance' },
-  { name: 'Quotations', href: '/quotations', icon: FileCheck2, category: 'Finance' },
-  { name: 'Invoices', href: '/invoices', icon: Receipt, category: 'Finance' },
-  { name: 'Payments & Receipts', href: '/payments', icon: CreditCard, category: 'Finance' },
-  { name: 'Driver Settlements', href: '/settlements', icon: DollarSign, category: 'Finance' },
-  { name: 'Expenses', href: '/expenses', icon: DollarSign, category: 'Finance' },
-  { name: 'Social Media Groups', href: '/social-groups', icon: Share2, category: 'Marketing & Leads' },
-  { name: 'Social Leads & CRM', href: '/social-leads', icon: Globe, category: 'Marketing & Leads' },
+  { name: 'Spare-Parts Inventory', href: '/inventory', icon: Package, category: 'Maintenance & Stores' },
+  { name: 'Service & Maintenance', href: '/services', icon: Wrench, category: 'Maintenance & Stores' },
+  { name: 'Expiring Documents', href: '/documents', icon: FileText, category: 'Maintenance & Stores' },
+  { name: 'Monthly Billing Engine (3000 KM)', href: '/billing-engine', icon: Calculator, category: 'Finance & Invoicing' },
+  { name: 'Driver Payroll & EPF/ETF', href: '/payroll', icon: DollarSign, category: 'Finance & Invoicing' },
+  { name: 'Invoices', href: '/invoices', icon: Receipt, category: 'Finance & Invoicing' },
+  { name: 'Quotations', href: '/quotations', icon: FileText, category: 'Finance & Invoicing' },
+  { name: 'Payments & Receipts', href: '/payments', icon: CreditCard, category: 'Finance & Invoicing' },
+  { name: 'Expenses', href: '/expenses', icon: DollarSign, category: 'Finance & Invoicing' },
+  { name: 'Social Post Creator', href: '/social-posts', icon: Share2, category: 'Marketing & Leads' },
+  { name: 'Social Media Groups', href: '/social-groups', icon: Globe, category: 'Marketing & Leads' },
+  { name: 'Social Leads & CRM', href: '/social-leads', icon: Users, category: 'Marketing & Leads' },
   { name: 'User Management', href: '/users', icon: Users, category: 'System' },
   { name: 'Settings', href: '/settings', icon: Settings, category: 'System' },
 ];
@@ -62,6 +68,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [companyName, setCompanyName] = useState('FleetFlow Lanka');
+  const [companyLogo, setCompanyLogo] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -70,13 +77,15 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         try {
           const parsed = JSON.parse(cached);
           if (parsed.companyName) setCompanyName(parsed.companyName);
+          if (parsed.logoUrl !== undefined) setCompanyLogo(parsed.logoUrl);
         } catch {}
       } else {
         fetch('/api/settings')
           .then((res) => res.json())
           .then((data) => {
-            if (data.success && data.data?.companyName) {
-              setCompanyName(data.data.companyName);
+            if (data.success && data.data) {
+              if (data.data.companyName) setCompanyName(data.data.companyName);
+              if (data.data.logoUrl) setCompanyLogo(data.data.logoUrl);
               localStorage.setItem('fleetflow_settings', JSON.stringify(data.data));
             }
           })
@@ -88,22 +97,31 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
       if (e.detail?.companyName) {
         setCompanyName(e.detail.companyName);
       }
+      if (e.detail?.logoUrl !== undefined) {
+        setCompanyLogo(e.detail.logoUrl);
+      }
     };
     window.addEventListener('fleetflow:settings-updated', handleSettingsUpdate);
     return () => window.removeEventListener('fleetflow:settings-updated', handleSettingsUpdate);
   }, []);
 
   // Group by category
-  const categories = ['Fleet & Operations', 'Maintenance', 'Finance', 'Marketing & Leads', 'System'];
+  const categories = ['Fleet & Operations', 'Maintenance & Stores', 'Finance & Invoicing', 'Marketing & Leads', 'System'];
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row text-slate-900 font-sans">
       {/* Mobile Top bar */}
       <header className="md:hidden bg-slate-900 text-white flex items-center justify-between p-4 shadow-md sticky top-0 z-50">
         <div className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-sm">
-            FL
-          </div>
+          {companyLogo ? (
+            <div className="h-8 w-8 rounded-lg bg-white p-0.5 flex items-center justify-center overflow-hidden border border-slate-700 shadow-sm shrink-0">
+              <img src={companyLogo} alt="Logo" className="h-full w-full object-contain" />
+            </div>
+          ) : (
+            <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-sm shrink-0">
+              {companyName ? companyName.charAt(0).toUpperCase() : 'FL'}
+            </div>
+          )}
           <span className="font-bold text-lg tracking-tight truncate max-w-[200px]">{companyName}</span>
         </div>
         <button
@@ -123,9 +141,15 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         {/* Brand header */}
         <div className="p-5 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-3 truncate">
-            <div className="h-10 w-10 shrink-0 rounded-xl bg-blue-600 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-blue-500/30">
-              {companyName ? companyName.charAt(0).toUpperCase() : 'F'}
-            </div>
+            {companyLogo ? (
+              <div className="h-11 w-11 shrink-0 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden border border-slate-700 shadow-lg shadow-blue-500/10">
+                <img src={companyLogo} alt="Company Logo" className="h-full w-full object-contain" />
+              </div>
+            ) : (
+              <div className="h-10 w-10 shrink-0 rounded-xl bg-blue-600 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-blue-500/30">
+                {companyName ? companyName.charAt(0).toUpperCase() : 'F'}
+              </div>
+            )}
             <div className="truncate">
               <h1 className="font-extrabold text-base text-white tracking-wide truncate">{companyName}</h1>
               <p className="text-xs text-blue-400 font-medium tracking-tight">Transport ERP Suite</p>
@@ -218,10 +242,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           </div>
 
           <div className="flex items-center space-x-5">
-            <div className="flex items-center space-x-2 text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Atlas MongoDB Live</span>
-            </div>
+            
 
             <Link
               href="/documents"

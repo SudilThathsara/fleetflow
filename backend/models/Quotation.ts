@@ -6,11 +6,17 @@ export interface IQuotationItem {
   quantity: number;
   unitPrice: number;
   total: number;
+  includedKm?: number;
+  extraKmRate?: number;
+  otHourlyRate?: number;
 }
 
-export interface IQuotation extends Document {
+export interface IQuotation {
+  _id?: any;
   quotationNumber: string;
-  customer: mongoose.Types.ObjectId;
+  quotationType?: 'Monthly Annual Agreement' | 'Daily / 2-Day Tour Hire' | 'Standard Quotation';
+  customer?: mongoose.Types.ObjectId;
+  customerCompany?: mongoose.Types.ObjectId;
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
@@ -23,15 +29,23 @@ export interface IQuotation extends Document {
   totalAmount: number;
   terms: string;
   notes?: string;
+  driverArrangement?: string;
+  fuelArrangement?: string;
   status: 'Draft' | 'Sent' | 'Accepted' | 'Rejected' | 'Converted';
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const QuotationSchema = new Schema<IQuotation>(
   {
     quotationNumber: { type: String, required: true, unique: true },
-    customer: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
+    quotationType: {
+      type: String,
+      enum: ['Monthly Annual Agreement', 'Daily / 2-Day Tour Hire', 'Standard Quotation'],
+      default: 'Monthly Annual Agreement',
+    },
+    customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
+    customerCompany: { type: Schema.Types.ObjectId, ref: 'CustomerCompany' },
     customerName: { type: String, required: true },
     customerPhone: { type: String, required: true },
     customerEmail: { type: String },
@@ -44,13 +58,21 @@ const QuotationSchema = new Schema<IQuotation>(
         quantity: { type: Number, required: true, default: 1 },
         unitPrice: { type: Number, required: true, default: 0 },
         total: { type: Number, required: true, default: 0 },
+        includedKm: { type: Number, default: 3000 },
+        extraKmRate: { type: Number, default: 100 },
+        otHourlyRate: { type: Number, default: 600 },
       },
     ],
     subtotal: { type: Number, required: true, default: 0 },
     discount: { type: Number, default: 0 },
     taxAmount: { type: Number, default: 0 },
     totalAmount: { type: Number, required: true, default: 0 },
-    terms: { type: String, default: '50% advance upon confirmation. Balance due on trip completion.' },
+    driverArrangement: { type: String, default: 'Experienced Professional Driver Included' },
+    fuelArrangement: { type: String, default: 'Fuel Billed at Actuals or Customer Provides' },
+    terms: {
+      type: String,
+      default: 'Annual Service Agreement terms apply. Standard 3,000 KM included per month. Excess KM billed at agreed rates.',
+    },
     notes: { type: String },
     status: {
       type: String,

@@ -1,6 +1,17 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IVehicleService extends Document {
+export interface IServicePartUsed {
+  part?: mongoose.Types.ObjectId;
+  sku?: string;
+  partName: string;
+  quantity: number;
+  unitCost: number;
+  totalCost: number;
+  issuedFromInventory: boolean;
+}
+
+export interface IVehicleService {
+  _id?: any;
   serviceId: string;
   vehicle: mongoose.Types.ObjectId;
   vehicleReg: string;
@@ -19,6 +30,7 @@ export interface IVehicleService extends Document {
     | 'Other';
   serviceDescription: string;
   workshopName: string;
+  partsUsed?: IServicePartUsed[];
   labourCost: number;
   sparePartsCost: number;
   otherCharges: number;
@@ -28,9 +40,22 @@ export interface IVehicleService extends Document {
   nextServiceOdometer?: number;
   status: 'Completed' | 'In Progress' | 'Scheduled';
   notes?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
+
+const ServicePartUsedSchema = new Schema<IServicePartUsed>(
+  {
+    part: { type: Schema.Types.ObjectId, ref: 'SparePart' },
+    sku: { type: String },
+    partName: { type: String, required: true },
+    quantity: { type: Number, required: true, default: 1 },
+    unitCost: { type: Number, required: true, default: 0 },
+    totalCost: { type: Number, required: true, default: 0 },
+    issuedFromInventory: { type: Boolean, default: true },
+  },
+  { _id: false }
+);
 
 const VehicleServiceSchema = new Schema<IVehicleService>(
   {
@@ -57,6 +82,7 @@ const VehicleServiceSchema = new Schema<IVehicleService>(
     },
     serviceDescription: { type: String, required: true },
     workshopName: { type: String, required: true },
+    partsUsed: [ServicePartUsedSchema],
     labourCost: { type: Number, default: 0 },
     sparePartsCost: { type: Number, default: 0 },
     otherCharges: { type: Number, default: 0 },

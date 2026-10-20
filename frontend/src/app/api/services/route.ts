@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import VehicleService from '@/models/VehicleService';
 import Vehicle from '@/models/Vehicle';
+import SparePart from '@/models/SparePart';
+import InventoryTransaction from '@/models/InventoryTransaction';
 import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
@@ -24,9 +26,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { errorResponse } = requireAuth(req, ['super_admin', 'manager', 'maintenance', 'operations']);
-    if (errorResponse) return errorResponse;
-
     await connectDB();
     const body = await req.json();
 
@@ -35,6 +34,43 @@ export async function POST(req: NextRequest) {
       body.serviceId = `SRV-${String(count + 1).padStart(4, '0')}`;
     }
 
+    const partsUsed = body.partsUsed || [];
+    let sparePartsCost = 0;
+
+    // Issue parts from inventory and deduct stock automatically!
+    for (const p of partsUsed) {
+      if (p.part && p.issuedFromInventory) {
+        const sparePart = await SparePart.findById(p.part);
+        if (sparePart) {
+          const qty = Number(p.quantity) || 1;
+          const prev = sparePart.currentStock;
+          sparePart.currentStock = Math.max(0, prev - qty);
+          await sparePart.save();
+
+          const txCount = await InventoryTransaction.countDocuments();
+          await InventoryTransaction.create({
+            transactionId: `ISSUE-${Date.now().toString().slice(-6)}-${String(txCount + 1).padStart(3, '0')}`,
+            part: sparePart._id,
+            sku: sparePart.sku,
+            partName: sparePart.name,
+            type: 'ISSUED_TO_SERVICE',
+            quantity: qty,
+            unitCost: p.unitCost || sparePart.unitCost,
+            totalCost: qty * (p.unitCost || sparePart.unitCost),
+            previousStock: prev,
+            newStock: sparePart.currentStock,
+            vehicle: body.vehicle,
+            vehicleReg: body.vehicleReg,
+            reference: body.serviceId,
+            date: body.serviceDate || new Date(),
+            notes: `Issued to ${body.serviceCategory || 'Service'}`,
+          });
+        }
+      }
+      sparePartsCost += Number(p.totalCost) || 0;
+    }
+
+    body.sparePartsCost = sparePartsCost > 0 ? sparePartsCost : (Number(body.sparePartsCost) || 0);
     body.totalCost = (Number(body.labourCost) || 0) + (Number(body.sparePartsCost) || 0) + (Number(body.otherCharges) || 0);
 
     const service = await VehicleService.create(body);

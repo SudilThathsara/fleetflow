@@ -15,6 +15,15 @@ export interface IDriver extends Document {
   joiningDate: Date;
   defaultPaymentMethod: 'Daily rate' | 'Monthly salary' | 'Per trip' | 'Per kilometre' | 'Commission-based';
   defaultRate: number;
+  basicSalary: number;
+  overtimeHourlyRate: number;
+  fixedAllowances: number;
+  epfNumber?: string;
+  bankName?: string;
+  bankAccountNumber?: string;
+  bankBranch?: string;
+  epfApplicable: boolean;
+  etfApplicable: boolean;
   assignedVehicle?: mongoose.Types.ObjectId;
   assignedVehicleReg?: string;
   status: 'Available' | 'Assigned' | 'On Trip' | 'On Leave' | 'Temporarily Unavailable' | 'Inactive';
@@ -44,9 +53,18 @@ const DriverSchema = new Schema<IDriver>(
     defaultPaymentMethod: {
       type: String,
       enum: ['Daily rate', 'Monthly salary', 'Per trip', 'Per kilometre', 'Commission-based'],
-      default: 'Daily rate',
+      default: 'Monthly salary',
     },
-    defaultRate: { type: Number, default: 2500 },
+    defaultRate: { type: Number, default: 3500 },
+    basicSalary: { type: Number, default: 65000 },
+    overtimeHourlyRate: { type: Number, default: 450 },
+    fixedAllowances: { type: Number, default: 5000 },
+    epfNumber: { type: String, default: '' },
+    bankName: { type: String, default: 'Commercial Bank of Ceylon' },
+    bankAccountNumber: { type: String, default: '' },
+    bankBranch: { type: String, default: 'Colombo' },
+    epfApplicable: { type: Boolean, default: true },
+    etfApplicable: { type: Boolean, default: true },
     assignedVehicle: { type: Schema.Types.ObjectId, ref: 'Vehicle' },
     assignedVehicleReg: { type: String },
     status: {

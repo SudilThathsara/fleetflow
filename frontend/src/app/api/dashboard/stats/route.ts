@@ -9,6 +9,10 @@ import Expense from '@/models/Expense';
 import DriverSettlement from '@/models/DriverSettlement';
 import DocumentRecord from '@/models/DocumentRecord';
 import SocialLead from '@/models/SocialLead';
+import CustomerCompany from '@/models/CustomerCompany';
+import Project from '@/models/Project';
+import Contract from '@/models/Contract';
+import SparePart from '@/models/SparePart';
 
 export async function GET() {
   try {
@@ -24,7 +28,13 @@ export async function GET() {
     const totalDrivers = await Driver.countDocuments();
     const availableDrivers = await Driver.countDocuments({ status: 'Available' });
 
-    // 3. Booking counts
+    // 3. Companies, Projects & Contracts
+    const totalCompanies = await CustomerCompany.countDocuments({ status: 'Active' });
+    const activeProjects = await Project.countDocuments({ status: 'Active' });
+    const activeContracts = await Contract.countDocuments({ status: 'Active' });
+    const lowStockParts = await SparePart.countDocuments({ $expr: { $lte: ['$currentStock', '$minStockLevel'] } });
+
+    // 4. Booking counts
     const totalBookings = await Booking.countDocuments();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -39,7 +49,7 @@ export async function GET() {
       status: { $in: ['Confirmed', 'Assigned'] },
     });
 
-    // 4. Financial metrics
+    // 5. Financial metrics
     const currentMonthPrefix = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
     const monthlyRunningEntries = await RunningChartEntry.find({ monthYear: currentMonthPrefix });
 
@@ -61,17 +71,17 @@ export async function GET() {
     const settlements = await DriverSettlement.find();
     const unpaidDriverSettlements = settlements.reduce((sum, item) => sum + (item.remainingBalance || 0), 0);
 
-    // 5. Expiring documents (next 30 days)
+    // 6. Expiring documents (next 30 days)
     const thirtyDaysAhead = new Date();
     thirtyDaysAhead.setDate(thirtyDaysAhead.getDate() + 30);
     const expiringDocsCount = await DocumentRecord.countDocuments({
       expiryDate: { $lte: thirtyDaysAhead },
     });
 
-    // 6. Social leads
+    // 7. Social leads
     const newLeadsCount = await SocialLead.countDocuments({ status: 'New' });
 
-    // 7. Recent bookings and activities
+    // 8. Recent bookings and activities
     const recentBookings = await Booking.find().sort({ createdAt: -1 }).limit(5);
 
     return NextResponse.json({
@@ -83,6 +93,10 @@ export async function GET() {
         maintenanceVehicles,
         totalDrivers,
         availableDrivers,
+        totalCompanies,
+        activeProjects,
+        activeContracts,
+        lowStockParts,
         totalBookings,
         todayBookings,
         upcomingBookings,
