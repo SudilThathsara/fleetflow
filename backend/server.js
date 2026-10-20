@@ -2480,6 +2480,41 @@ app.get('/api/settings', async (req, res) => {
   }
 });
 
+// Dynamic Favicon / Logo Image Endpoint
+app.get('/api/branding/favicon', async (req, res) => {
+  try {
+    const settings = await CompanySettings.findOne();
+    const companyName = settings?.companyName || 'FleetFlow Lanka';
+    const logoUrl = settings?.logoUrl || '';
+
+    // 1. Base64 Image
+    if (logoUrl.startsWith('data:image/')) {
+      const matches = logoUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      if (matches && matches.length === 3) {
+        const mimeType = matches[1];
+        const buffer = Buffer.from(matches[2], 'base64');
+        res.setHeader('Content-Type', mimeType);
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        return res.send(buffer);
+      }
+    }
+
+    // 2. Direct URL
+    if (logoUrl.startsWith('http://') || logoUrl.startsWith('https://')) {
+      return res.redirect(logoUrl);
+    }
+
+    // 3. Dynamic Letter SVG
+    const letter = companyName.trim().charAt(0).toUpperCase() || 'F';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64"><rect width="64" height="64" rx="16" fill="#2563EB"/><text x="50%" y="54%" font-family="sans-serif" font-size="38" font-weight="900" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${letter}</text></svg>`;
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.send(svg);
+  } catch (err) {
+    res.status(500).send('Error');
+  }
+});
+
 const handleSaveSettings = async (req, res) => {
   try {
     let settings = await CompanySettings.findOne();

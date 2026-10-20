@@ -50,7 +50,7 @@ const navigationItems: SidebarItem[] = [
   { name: 'Spare-Parts Inventory', href: '/inventory', icon: Package, category: 'Maintenance & Stores' },
   { name: 'Service & Maintenance', href: '/services', icon: Wrench, category: 'Maintenance & Stores' },
   { name: 'Expiring Documents', href: '/documents', icon: FileText, category: 'Maintenance & Stores' },
-  { name: 'Monthly Billing Engine (3000 KM)', href: '/billing-engine', icon: Calculator, category: 'Finance & Invoicing' },
+  { name: 'Monthly Billing', href: '/billing-engine', icon: Calculator, category: 'Finance & Invoicing' },
   { name: 'Driver Payroll & EPF/ETF', href: '/payroll', icon: DollarSign, category: 'Finance & Invoicing' },
   { name: 'Invoices', href: '/invoices', icon: Receipt, category: 'Finance & Invoicing' },
   { name: 'Quotations', href: '/quotations', icon: FileText, category: 'Finance & Invoicing' },

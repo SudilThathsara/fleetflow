@@ -15,9 +15,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'FleetFlow Lanka — Vehicle, Driver & Transport Operations Management',
+  title: 'Tourism & Transport — Fleet & Operations',
   description:
     'Comprehensive Enterprise Fleet, Driver, Running Chart, Invoicing & Transport Operations Management System for Sri Lanka.',
+  icons: {
+    icon: '/api/branding/favicon',
+    shortcut: '/api/branding/favicon',
+    apple: '/api/branding/favicon',
+  },
 };
 
 export default function RootLayout({
