@@ -5,21 +5,24 @@ import { useEffect } from 'react';
 export function DynamicBrandingHead() {
   useEffect(() => {
     const updateFaviconInDOM = (faviconHref: string) => {
-      // 1. Remove all old icon links to force Chrome/Edge to re-render
-      const oldIcons = document.querySelectorAll("link[rel*='icon']");
-      oldIcons.forEach((el) => el.remove());
+      // Reuse Next.js-managed links instead of removing them. Removing head
+      // nodes behind React's back can cause a removeChild hydration error.
+      let icon = document.head.querySelector<HTMLLinkElement>("link[rel='icon']");
+      if (!icon) {
+        icon = document.createElement('link');
+        document.head.appendChild(icon);
+      }
+      icon.rel = 'icon';
+      icon.type = 'image/png';
+      icon.href = faviconHref;
 
-      // 2. Append new dynamic icon link with cache-busting
-      const newIcon = document.createElement('link');
-      newIcon.rel = 'icon';
-      newIcon.type = 'image/png';
-      newIcon.href = faviconHref;
-      document.head.appendChild(newIcon);
-
-      const appleIcon = document.createElement('link');
+      let appleIcon = document.head.querySelector<HTMLLinkElement>("link[rel='apple-touch-icon']");
+      if (!appleIcon) {
+        appleIcon = document.createElement('link');
+        document.head.appendChild(appleIcon);
+      }
       appleIcon.rel = 'apple-touch-icon';
       appleIcon.href = faviconHref;
-      document.head.appendChild(appleIcon);
     };
 
     const applyBranding = (data: { companyName?: string; logoUrl?: string }) => {
@@ -57,9 +60,10 @@ export function DynamicBrandingHead() {
     }
 
     // Real-time listener when user saves in Settings
-    const handleUpdate = (e: any) => {
-      if (e.detail) {
-        applyBranding(e.detail);
+    const handleUpdate = (event: Event) => {
+      const detail = (event as CustomEvent<{ companyName?: string; logoUrl?: string }>).detail;
+      if (detail) {
+        applyBranding(detail);
       }
     };
 

@@ -105,13 +105,20 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
     return () => window.removeEventListener('fleetflow:settings-updated', handleSettingsUpdate);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = sidebarOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [sidebarOpen]);
+
   // Group by category
   const categories = ['Fleet & Operations', 'Maintenance & Stores', 'Finance & Invoicing', 'Marketing & Leads', 'System'];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row text-slate-900 font-sans">
+    <div className="min-h-screen min-w-0 bg-slate-50 flex flex-col md:flex-row text-slate-900 font-sans">
       {/* Mobile Top bar */}
-      <header className="md:hidden bg-slate-900 text-white flex items-center justify-between p-4 shadow-md sticky top-0 z-50">
+      <header className="md:hidden bg-slate-900 text-white flex items-center justify-between gap-3 px-4 py-3 shadow-md sticky top-0 z-50">
         <div className="flex items-center space-x-2">
           {companyLogo ? (
             <div className="h-8 w-8 rounded-lg bg-white p-0.5 flex items-center justify-center overflow-hidden border border-slate-700 shadow-sm shrink-0">
@@ -126,15 +133,25 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         </div>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-1 rounded-md text-slate-300 hover:text-white focus:outline-none"
+          aria-label={sidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={sidebarOpen}
+          className="shrink-0 rounded-md p-2 text-slate-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </header>
 
+      {sidebarOpen && (
+        <button
+          aria-label="Close navigation menu"
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-slate-950/60 md:hidden"
+        />
+      )}
+
       {/* Sidebar */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen w-72 bg-slate-900 text-slate-200 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+        className={`fixed md:sticky top-0 left-0 h-screen w-[min(18rem,calc(100vw-2rem))] bg-slate-900 text-slate-200 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
@@ -227,10 +244,10 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen overflow-x-hidden">
         {/* Desktop Topbar */}
-        <header className="hidden md:flex bg-white border-b border-slate-200 h-16 items-center justify-between px-8 sticky top-0 z-30 shadow-xs">
-          <div className="flex items-center space-x-4 w-96">
+        <header className="hidden md:flex bg-white border-b border-slate-200 min-h-16 items-center justify-between gap-6 px-4 lg:px-8 py-2 sticky top-0 z-30 shadow-xs">
+          <div className="flex items-center space-x-4 w-full max-w-96">
             <div className="relative w-full">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -268,7 +285,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         </header>
 
         {/* Page children */}
-        <main className="flex-1 p-4 md:p-8">{children}</main>
+        <main className="flex-1 min-w-0 p-3 sm:p-4 md:p-8">{children}</main>
       </div>
     </div>
   );

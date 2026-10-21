@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 export interface User {
   id: string;
@@ -32,7 +31,6 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   // Function to refresh user profile from database
   const refreshUser = async () => {
@@ -154,12 +152,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await fetch('/api/auth/logout', { method: 'POST' });
     } finally {
       setUser(null);
-      localStorage.removeItem('fleetflow_user');
-      localStorage.removeItem('fleetflow_token');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('fleetflow_user');
+        localStorage.removeItem('fleetflow_token');
+      }
       if (typeof document !== 'undefined') {
         document.cookie = 'token=; path=/; max-age=0; SameSite=Lax';
       }
-      router.push('/login');
+      // Use a full navigation so protected page state cannot remain mounted
+      // after the token and cached user have been cleared.
+      window.location.replace('/login');
     }
   };
 

@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { ShieldCheck, Truck, Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
 
@@ -10,8 +9,52 @@ export default function LoginPage() {
   const [password, setPassword] = useState('admin123');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [branding, setBranding] = useState({
+    companyName: 'FleetFlow Lanka',
+    tagline: 'Enterprise Fleet & Transport Operations',
+    logoUrl: '',
+  });
   const { login } = useAuth();
-  const router = useRouter();
+
+  useEffect(() => {
+    const applyBranding = (data: { companyName?: string; tagline?: string; logoUrl?: string }) => {
+      setBranding((current) => ({
+        companyName: data.companyName?.trim() || current.companyName,
+        tagline: data.tagline?.trim() || current.tagline,
+        logoUrl: data.logoUrl || '',
+      }));
+    };
+
+    const cached = localStorage.getItem('fleetflow_settings');
+    if (cached) {
+      try {
+        applyBranding(JSON.parse(cached));
+      } catch (err) {
+        console.warn('Unable to read cached company branding:', err);
+      }
+    }
+
+    fetch('/api/settings')
+      .then((res) => {
+        if (!res.ok) throw new Error(`Settings request failed with status ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (data.success && data.data) {
+          applyBranding(data.data);
+          localStorage.setItem('fleetflow_settings', JSON.stringify(data.data));
+        }
+      })
+      .catch((err) => console.warn('Unable to load company branding:', err));
+
+    const handleBrandingUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent<{ companyName?: string; tagline?: string; logoUrl?: string }>;
+      if (customEvent.detail) applyBranding(customEvent.detail);
+    };
+
+    window.addEventListener('fleetflow:settings-updated', handleBrandingUpdate);
+    return () => window.removeEventListener('fleetflow:settings-updated', handleBrandingUpdate);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,12 +64,12 @@ export default function LoginPage() {
     try {
       const res = await login(email, password);
       if (res.success) {
-        router.push('/dashboard');
+        window.location.replace('/dashboard');
       } else {
         setError(res.message || 'Invalid email or password');
       }
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during authentication');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred during authentication');
     } finally {
       setLoading(false);
     }
@@ -37,12 +80,16 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
         {/* Top Header */}
         <div className="bg-slate-950 p-8 text-center text-white relative">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30">
-            <Truck size={32} className="text-white" />
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30 overflow-hidden p-2">
+            {branding.logoUrl ? (
+              <img src={branding.logoUrl} alt={`${branding.companyName} logo`} className="h-full w-full object-contain" />
+            ) : (
+              <Truck size={32} className="text-white" />
+            )}
           </div>
-          <h1 className="text-2xl font-black tracking-tight">FleetFlow Lanka</h1>
+          <h1 className="text-2xl font-black tracking-tight">{branding.companyName}</h1>
           <p className="text-xs text-blue-400 mt-1 uppercase tracking-wider font-semibold">
-            Enterprise Fleet & Transport Operations
+            {branding.tagline}
           </p>
         </div>
 
