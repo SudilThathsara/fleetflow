@@ -62,7 +62,6 @@ export default function VehiclesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [webFilter, setWebFilter] = useState('all');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -185,27 +184,6 @@ export default function VehiclesPage() {
     }
   };
 
-  const handleTogglePublish = async (vehicle: any) => {
-    const updatedStatus = !vehicle.isPublishedToFleet;
-    try {
-      const res = await fetch(`/api/vehicles/${vehicle._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isPublishedToFleet: updatedStatus }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setVehicles((prev) =>
-          prev.map((v) => (v._id === vehicle._id ? { ...v, isPublishedToFleet: updatedStatus } : v))
-        );
-      } else {
-        alert(data.message || 'Failed to update status');
-      }
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
-
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -304,12 +282,6 @@ export default function VehiclesPage() {
     }
   };
 
-  const filteredVehicles = vehicles.filter((v) => {
-    if (webFilter === 'published') return v.isPublishedToFleet === true;
-    if (webFilter === 'private') return !v.isPublishedToFleet;
-    return true;
-  });
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -318,32 +290,19 @@ export default function VehiclesPage() {
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2.5">
               <Car className="text-blue-600" size={26} />
-              <span>Vehicle Registry & Fleet Catalogue</span>
+              <span>Vehicle Registry & Fleet</span>
             </h1>
             <p className="text-sm text-slate-500 mt-0.5">
-              Manage fleet vehicles, maintenance odometer, upload public showcase photos & publish to website
+              Manage fleet vehicles, maintenance odometer, and showcase photos
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/fleet"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-xl text-sm font-semibold flex items-center gap-2 transition"
-              title="See how published vehicles appear to clients"
-            >
-              <Globe size={16} />
-              <span>View Live Website Fleet</span>
-              <ExternalLink size={13} className="opacity-70" />
-            </Link>
-            <button
-              onClick={handleOpenAdd}
-              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm transition"
-            >
-              <Plus size={18} />
-              <span>Register Vehicle</span>
-            </button>
-          </div>
+          <button
+            onClick={handleOpenAdd}
+            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm transition"
+          >
+            <Plus size={18} />
+            <span>Register Vehicle</span>
+          </button>
         </div>
 
         {/* Filters */}
@@ -359,35 +318,20 @@ export default function VehiclesPage() {
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            <div className="flex items-center space-x-2">
-              <Filter size={15} className="text-slate-400" />
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none"
-              >
-                <option value="">All Statuses</option>
-                <option value="Available">Available</option>
-                <option value="Booked">Booked</option>
-                <option value="On Trip">On Trip</option>
-                <option value="Under Maintenance">Under Maintenance</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Globe size={15} className="text-slate-400" />
-              <select
-                value={webFilter}
-                onChange={(e) => setWebFilter(e.target.value)}
-                className="px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none"
-              >
-                <option value="all">Website: All Vehicles</option>
-                <option value="published">🌐 Published to Website</option>
-                <option value="private">🔒 Internal / Private Only</option>
-              </select>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Filter size={15} className="text-slate-400" />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none"
+            >
+              <option value="">All Statuses</option>
+              <option value="Available">Available</option>
+              <option value="Booked">Booked</option>
+              <option value="On Trip">On Trip</option>
+              <option value="Under Maintenance">Under Maintenance</option>
+              <option value="Inactive">Inactive</option>
+            </select>
           </div>
         </div>
 
@@ -400,7 +344,7 @@ export default function VehiclesPage() {
                   <th className="p-4 pl-6">Vehicle</th>
                   <th className="p-4">Reg Number</th>
                   <th className="p-4">Specs & Capacity</th>
-                  <th className="p-4">Website Showcase</th>
+                  <th className="p-4">Ownership</th>
                   <th className="p-4">Odometer</th>
                   <th className="p-4">Next Service</th>
                   <th className="p-4">Status</th>
@@ -414,7 +358,7 @@ export default function VehiclesPage() {
                       Loading vehicles from database...
                     </td>
                   </tr>
-                ) : filteredVehicles.length === 0 ? (
+                ) : vehicles.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="p-12 text-center text-slate-400 space-y-2">
                       <Car size={36} className="mx-auto text-slate-300" />
@@ -423,7 +367,7 @@ export default function VehiclesPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredVehicles.map((v) => (
+                  vehicles.map((v) => (
                     <tr key={v._id} className="hover:bg-slate-50/70 transition-colors">
                       <td className="p-4 pl-6">
                         <div className="flex items-center gap-3">
@@ -466,26 +410,9 @@ export default function VehiclesPage() {
                         </p>
                       </td>
                       <td className="p-4">
-                        <div className="space-y-1">
-                          <button
-                            type="button"
-                            onClick={() => handleTogglePublish(v)}
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition cursor-pointer ${
-                              v.isPublishedToFleet
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
-                                : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
-                            }`}
-                            title="Click to toggle public website display"
-                          >
-                            <Globe size={12} className={v.isPublishedToFleet ? 'text-emerald-600' : 'text-slate-400'} />
-                            <span>{v.isPublishedToFleet ? 'Live on Web' : 'Private'}</span>
-                          </button>
-                          {v.publicPhotos?.length > 0 && (
-                            <p className="text-[11px] text-slate-400 flex items-center gap-1">
-                              <ImageIcon size={11} /> {v.publicPhotos.length} photo{v.publicPhotos.length > 1 ? 's' : ''}
-                            </p>
-                          )}
-                        </div>
+                        <span className="text-xs font-medium text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg">
+                          {v.ownershipType || 'Business-owned'}
+                        </span>
                       </td>
                       <td className="p-4 font-mono font-bold text-slate-800 text-xs">
                         {v.currentOdometer?.toLocaleString()} KM
@@ -588,7 +515,7 @@ export default function VehiclesPage() {
                 }`}
               >
                 <ImageIcon size={14} />
-                <span>📸 Website Showcase & Photos</span>
+                <span>📸 Vehicle Photos</span>
                 {formData.publicPhotos.length > 0 && (
                   <span className="px-1.5 py-0.2 rounded-full bg-white/20 text-[10px] font-black">
                     {formData.publicPhotos.length}
@@ -765,31 +692,9 @@ export default function VehiclesPage() {
                 </div>
               )}
 
-              {/* TAB 2: WEBSITE SHOWCASE & IMAGES */}
+              {/* TAB 2: VEHICLE PHOTOS & DETAILS */}
               {activeModalTab === 'photos' && (
                 <div className="space-y-5">
-                  {/* Public Publish Switch */}
-                  <div className="bg-sky-50/70 border border-sky-200 rounded-2xl p-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                        <Globe className="text-sky-600" size={17} />
-                        <span>Publish to Public Website Fleet Catalogue</span>
-                      </p>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        When enabled, this vehicle with its photos and specs appears on <code>/fleet</code> and the homepage highlights.
-                      </p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.isPublishedToFleet}
-                        onChange={(e) => setFormData({ ...formData, isPublishedToFleet: e.target.checked })}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                  </div>
-
                   {/* Image Uploader & Presets */}
                   <div className="space-y-3">
                     <label className="block text-xs font-bold text-slate-700 uppercase">
@@ -984,15 +889,7 @@ export default function VehiclesPage() {
 
               {/* Modal Action Buttons */}
               <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-6">
-                <div className="text-xs text-slate-400">
-                  {formData.isPublishedToFleet ? (
-                    <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                      <Globe size={13} /> Published to Website Fleet
-                    </span>
-                  ) : (
-                    <span>Internal vehicle only</span>
-                  )}
-                </div>
+                <div />
                 <div className="flex items-center space-x-3">
                   <button
                     type="button"

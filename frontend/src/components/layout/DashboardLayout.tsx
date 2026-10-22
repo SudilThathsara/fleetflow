@@ -203,24 +203,6 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
             <span>Dashboard</span>
           </Link>
 
-          {/* Direct Link to Public Website */}
-          <Link
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => setSidebarOpen(false)}
-            className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-gradient-to-r from-sky-950/60 to-slate-850 border border-sky-500/30 text-sky-300 hover:text-white hover:border-sky-400 hover:from-sky-900/60 transition group shadow-sm"
-          >
-            <div className="flex items-center space-x-2.5">
-              <Globe size={17} className="text-sky-400 group-hover:rotate-12 transition-transform" />
-              <div className="text-left">
-                <span className="block text-xs font-bold leading-tight">View Public Website</span>
-                <span className="block text-[10px] text-sky-400/80 leading-tight">Open in new tab</span>
-              </div>
-            </div>
-            <ExternalLink size={13} className="text-sky-400/70 group-hover:text-white transition-colors" />
-          </Link>
-
           {categories.map((cat) => (
             <div key={cat} className="space-y-1">
               <div className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">{cat}</div>
