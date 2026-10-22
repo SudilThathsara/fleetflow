@@ -48,7 +48,7 @@ const navigationItems: SidebarItem[] = [
   { name: 'Bookings & Daily/2-Day Hire', href: '/bookings', icon: CalendarDays, category: 'Fleet & Operations' },
   { name: 'Monthly Running Charts', href: '/running-charts', icon: FileSpreadsheet, category: 'Fleet & Operations' },
   { name: 'Spare-Parts Inventory', href: '/inventory', icon: Package, category: 'Maintenance & Stores' },
-  { name: 'Service & Maintenance', href: '/services', icon: Wrench, category: 'Maintenance & Stores' },
+  { name: 'Service & Maintenance', href: '/maintenance', icon: Wrench, category: 'Maintenance & Stores' },
   { name: 'Expiring Documents', href: '/documents', icon: FileText, category: 'Maintenance & Stores' },
   { name: 'Monthly Billing', href: '/billing-engine', icon: Calculator, category: 'Finance & Invoicing' },
   { name: 'Driver Payroll & EPF/ETF', href: '/payroll', icon: DollarSign, category: 'Finance & Invoicing' },

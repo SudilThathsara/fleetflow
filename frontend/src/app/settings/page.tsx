@@ -17,10 +17,11 @@ import {
   HelpCircle,
   ShieldCheck,
   RefreshCw,
+  Globe,
 } from 'lucide-react';
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<'branding' | 'statutory' | 'billing'>('branding');
+  const [activeTab, setActiveTab] = useState<'branding' | 'statutory' | 'billing' | 'website'>('branding');
   const [settings, setSettings] = useState({
     companyName: 'FleetFlow Lanka (Pvt) Ltd',
     tagline: 'Enterprise Fleet & Transport Operations Management',
@@ -45,6 +46,23 @@ export default function SettingsPage() {
     etfRegistrationNumber: 'ETF/L/38291',
     maxAdvanceDeductionPerMonth: 10000,
     normalWorkingHoursPerDay: 8,
+  });
+
+  const [websiteContent, setWebsiteContent] = useState({
+    businessName: 'Lanka Premier Transport & Vehicle Hire',
+    tagline: 'Reliable Vehicle Hire & Corporate Transport Solutions in Sri Lanka',
+    heroHeadline: 'Reliable Vehicle Hire & Corporate Transport Solutions',
+    heroSubheadline: 'Premium double cabs, spacious passenger vans, monthly corporate transport, and island-wide vehicle hire services with verified professional drivers.',
+    whatsappNumber: '+94771234567',
+    servicesEnabled: {
+      monthlyHire: true,
+      corporateHire: true,
+      doubleCabHire: true,
+      vanHire: true,
+      dailyHire: true,
+      tourismTravel: true,
+      projectTransport: true,
+    },
   });
 
   const [loading, setLoading] = useState(true);
@@ -73,6 +91,23 @@ export default function SettingsPage() {
       })
       .catch((err) => console.error('Error fetching settings:', err))
       .finally(() => setLoading(false));
+
+    fetch('/api/public/content')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setWebsiteContent((prev) => ({
+            ...prev,
+            businessName: data.data.businessName || prev.businessName,
+            tagline: data.data.tagline || prev.tagline,
+            heroHeadline: data.data.heroHeadline || prev.heroHeadline,
+            heroSubheadline: data.data.heroSubheadline || prev.heroSubheadline,
+            whatsappNumber: data.data.whatsappNumber || prev.whatsappNumber,
+            servicesEnabled: data.data.servicesEnabled || prev.servicesEnabled,
+          }));
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,11 +145,18 @@ export default function SettingsPage() {
     setSaveSuccess(false);
 
     try {
-      const res = await fetch('/api/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings),
-      });
+      const [res, webRes] = await Promise.all([
+        fetch('/api/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(settings),
+        }),
+        fetch('/api/public/content', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(websiteContent),
+        }),
+      ]);
       const data = await res.json();
       if (data.success) {
         setSaveSuccess(true);
@@ -219,6 +261,18 @@ export default function SettingsPage() {
           >
             <CreditCard size={16} />
             <span>Billing, Prefixes & Banking</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('website')}
+            className={`pb-3 px-4 font-bold text-sm flex items-center gap-2 border-b-2 transition-all ${
+              activeTab === 'website'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Globe size={16} />
+            <span>Public Website CMS</span>
           </button>
         </div>
 
@@ -694,6 +748,170 @@ export default function SettingsPage() {
                     onChange={(e) => setSettings({ ...settings, terms: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-600"
                   ></textarea>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: Public Website CMS */}
+          {activeTab === 'website' && (
+            <div className="space-y-6 animate-in fade-in duration-150">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs space-y-4">
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+                    Public Website Branding & Marketing Content
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Control public titles, headlines, contact numbers, and service visibility shown to prospective clients.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      Public Business Trading Name
+                    </label>
+                    <input
+                      type="text"
+                      value={websiteContent.businessName}
+                      onChange={(e) => setWebsiteContent({ ...websiteContent, businessName: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      WhatsApp Quick Booking Hotline
+                    </label>
+                    <input
+                      type="text"
+                      value={websiteContent.whatsappNumber}
+                      onChange={(e) => setWebsiteContent({ ...websiteContent, whatsappNumber: e.target.value })}
+                      placeholder="+94771234567"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-600"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    Homepage Hero Headline
+                  </label>
+                  <input
+                    type="text"
+                    value={websiteContent.heroHeadline}
+                    onChange={(e) => setWebsiteContent({ ...websiteContent, heroHeadline: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-600 font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    Homepage Hero Subheadline / Business Description
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={websiteContent.heroSubheadline}
+                    onChange={(e) => setWebsiteContent({ ...websiteContent, heroSubheadline: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-600"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
+                    Enabled Public Transport Services
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs text-slate-700">
+                    <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={websiteContent.servicesEnabled?.monthlyHire}
+                        onChange={(e) =>
+                          setWebsiteContent({
+                            ...websiteContent,
+                            servicesEnabled: { ...websiteContent.servicesEnabled, monthlyHire: e.target.checked },
+                          })
+                        }
+                        className="rounded text-blue-600"
+                      />
+                      <span className="font-semibold">Monthly Corporate Hire</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={websiteContent.servicesEnabled?.doubleCabHire}
+                        onChange={(e) =>
+                          setWebsiteContent({
+                            ...websiteContent,
+                            servicesEnabled: { ...websiteContent.servicesEnabled, doubleCabHire: e.target.checked },
+                          })
+                        }
+                        className="rounded text-blue-600"
+                      />
+                      <span className="font-semibold">Double-Cab Pickups (4x4)</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={websiteContent.servicesEnabled?.vanHire}
+                        onChange={(e) =>
+                          setWebsiteContent({
+                            ...websiteContent,
+                            servicesEnabled: { ...websiteContent.servicesEnabled, vanHire: e.target.checked },
+                          })
+                        }
+                        className="rounded text-blue-600"
+                      />
+                      <span className="font-semibold">Passenger Van Hire</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={websiteContent.servicesEnabled?.dailyHire}
+                        onChange={(e) =>
+                          setWebsiteContent({
+                            ...websiteContent,
+                            servicesEnabled: { ...websiteContent.servicesEnabled, dailyHire: e.target.checked },
+                          })
+                        }
+                        className="rounded text-blue-600"
+                      />
+                      <span className="font-semibold">Daily & Tour Hire</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={websiteContent.servicesEnabled?.corporateHire}
+                        onChange={(e) =>
+                          setWebsiteContent({
+                            ...websiteContent,
+                            servicesEnabled: { ...websiteContent.servicesEnabled, corporateHire: e.target.checked },
+                          })
+                        }
+                        className="rounded text-blue-600"
+                      />
+                      <span className="font-semibold">Corporate Fleet SLAs</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={websiteContent.servicesEnabled?.projectTransport}
+                        onChange={(e) =>
+                          setWebsiteContent({
+                            ...websiteContent,
+                            servicesEnabled: { ...websiteContent.servicesEnabled, projectTransport: e.target.checked },
+                          })
+                        }
+                        className="rounded text-blue-600"
+                      />
+                      <span className="font-semibold">Turnkey Project Mobility</span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>

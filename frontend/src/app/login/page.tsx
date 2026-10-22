@@ -1,59 +1,55 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldCheck, Truck, Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Truck, Lock, Mail, ArrowRight, AlertCircle, Eye, EyeOff, UserPlus, Home } from 'lucide-react';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('admin@fleetflow.lk');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [branding, setBranding] = useState({
-    companyName: 'FleetFlow Lanka',
-    tagline: 'Enterprise Fleet & Transport Operations',
+    companyName: 'Lanka Premier Transport',
+    tagline: 'Reliable Vehicle Hire & Corporate Fleet Solutions',
     logoUrl: '',
   });
   const { login } = useAuth();
 
   useEffect(() => {
-    const applyBranding = (data: { companyName?: string; tagline?: string; logoUrl?: string }) => {
-      setBranding((current) => ({
-        companyName: data.companyName?.trim() || current.companyName,
-        tagline: data.tagline?.trim() || current.tagline,
-        logoUrl: data.logoUrl || '',
-      }));
-    };
+    // Read saved rememberMe email if exists
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('fleetflow_remembered_email');
+      if (saved) setEmail(saved);
 
-    const cached = localStorage.getItem('fleetflow_settings');
-    if (cached) {
-      try {
-        applyBranding(JSON.parse(cached));
-      } catch (err) {
-        console.warn('Unable to read cached company branding:', err);
+      const cached = localStorage.getItem('fleetflow_settings');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setBranding((b) => ({
+            companyName: parsed.companyName || b.companyName,
+            tagline: parsed.tagline || b.tagline,
+            logoUrl: parsed.logoUrl || '',
+          }));
+        } catch {}
       }
     }
 
-    fetch('/api/settings')
-      .then((res) => {
-        if (!res.ok) throw new Error(`Settings request failed with status ${res.status}`);
-        return res.json();
-      })
+    fetch('/api/public/content')
+      .then((res) => res.json())
       .then((data) => {
         if (data.success && data.data) {
-          applyBranding(data.data);
-          localStorage.setItem('fleetflow_settings', JSON.stringify(data.data));
+          setBranding((b) => ({
+            companyName: data.data.businessName || b.companyName,
+            tagline: data.data.tagline || b.tagline,
+            logoUrl: data.data.logoUrl || '',
+          }));
         }
       })
-      .catch((err) => console.warn('Unable to load company branding:', err));
-
-    const handleBrandingUpdate = (event: Event) => {
-      const customEvent = event as CustomEvent<{ companyName?: string; tagline?: string; logoUrl?: string }>;
-      if (customEvent.detail) applyBranding(customEvent.detail);
-    };
-
-    window.addEventListener('fleetflow:settings-updated', handleBrandingUpdate);
-    return () => window.removeEventListener('fleetflow:settings-updated', handleBrandingUpdate);
+      .catch(() => {});
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,33 +58,50 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      if (rememberMe) {
+        localStorage.setItem('fleetflow_remembered_email', email);
+      } else {
+        localStorage.removeItem('fleetflow_remembered_email');
+      }
+
       const res = await login(email, password);
       if (res.success) {
-        window.location.replace('/dashboard');
+        const dest = res.redirectUrl || (res.role === 'customer' ? '/portal' : '/dashboard');
+        window.location.replace(dest);
       } else {
-        setError(res.message || 'Invalid email or password');
+        setError(res.message || 'Invalid email or password.');
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'An error occurred during authentication');
+      setError(err instanceof Error ? err.message : 'An error occurred during authentication.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 flex flex-col items-center justify-center p-4">
+      <div className="mb-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 text-sm border border-slate-700 transition"
+        >
+          <Home size={16} />
+          <span>Back to Public Website</span>
+        </Link>
+      </div>
+
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
         {/* Top Header */}
-        <div className="bg-slate-950 p-8 text-center text-white relative">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30 overflow-hidden p-2">
+        <div className="bg-slate-950 p-8 text-center text-white relative border-b border-slate-800">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-sky-600 flex items-center justify-center mb-4 shadow-lg shadow-sky-500/30 overflow-hidden p-2">
             {branding.logoUrl ? (
-              <img src={branding.logoUrl} alt={`${branding.companyName} logo`} className="h-full w-full object-contain" />
+              <img src={branding.logoUrl} alt={branding.companyName} className="h-full w-full object-contain" />
             ) : (
               <Truck size={32} className="text-white" />
             )}
           </div>
-          <h1 className="text-2xl font-black tracking-tight">{branding.companyName}</h1>
-          <p className="text-xs text-blue-400 mt-1 uppercase tracking-wider font-semibold">
+          <h1 className="text-2xl font-bold tracking-tight">{branding.companyName}</h1>
+          <p className="text-xs text-sky-400 mt-1 uppercase tracking-wider font-semibold">
             {branding.tagline}
           </p>
         </div>
@@ -96,69 +109,132 @@ export default function LoginPage() {
         {/* Form Container */}
         <div className="p-8">
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-slate-800">Sign in to your account</h2>
-            <p className="text-sm text-slate-500">Access vehicle charts, bookings, invoices and drivers</p>
+            <h2 className="text-xl font-bold text-slate-900">Sign in to your account</h2>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Access your customer portal, quotations, bookings, or staff dashboard.
+            </p>
           </div>
 
           {error && (
-            <div className="mb-5 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-start space-x-2">
-              <AlertCircle size={18} className="shrink-0 mt-0.5" />
-              <span>{error}</span>
+            <div className="mb-5 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 text-red-700 text-sm animate-shake">
+              <AlertCircle size={18} className="shrink-0 mt-0.5 text-red-500" />
+              <div>
+                <p className="font-semibold">Authentication failed</p>
+                <p className="text-xs mt-0.5 text-red-600">{error}</p>
+              </div>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Email Address</label>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                Email Address
+              </label>
               <div className="relative">
-                <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Mail className="absolute left-3.5 top-3 text-slate-400" size={18} />
                 <input
                   type="email"
-                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@fleetflow.lk"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+                  placeholder="name@example.com"
+                  required
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent text-sm transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Password</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  Password
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-sky-600 hover:text-sky-700 font-medium hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
-                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Lock className="absolute left-3.5 top-3 text-slate-400" size={18} />
                 <input
-                  type="password"
-                  required
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+                  required
+                  className="w-full pl-10 pr-11 py-2.5 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent text-sm transition"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 transition"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
+            </div>
+
+            <div className="flex items-center justify-between py-1">
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="rounded text-sky-600 focus:ring-sky-500 border-slate-300"
+                />
+                <span>Remember my email</span>
+              </label>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors flex items-center justify-center space-x-2 shadow-md shadow-blue-600/30 disabled:opacity-70 mt-6"
+              className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 disabled:bg-sky-400 text-white font-semibold rounded-xl shadow-lg shadow-sky-600/30 flex items-center justify-center gap-2 text-sm transition cursor-pointer"
             >
-              <span>{loading ? 'Authenticating...' : 'Sign In to Operations'}</span>
-              {!loading && <ArrowRight size={18} />}
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span>Sign In</span>
+                  <ArrowRight size={16} />
+                </>
+              )}
             </button>
           </form>
 
-          {/* Quick Demo Credential badge */}
-          <div className="mt-8 pt-5 border-t border-slate-100 bg-slate-50 -mx-8 -mb-8 p-6 text-xs text-slate-600">
-            <div className="flex items-center space-x-1.5 font-bold text-slate-700 mb-2">
-              <ShieldCheck size={16} className="text-emerald-600" />
-              <span>Default Administrator Access:</span>
-            </div>
-            <div className="space-y-1 text-slate-500 font-mono text-[11px] bg-white p-3 rounded-lg border border-slate-200">
-              <p>Email: <span className="text-blue-600 font-semibold">admin@fleetflow.lk</span></p>
-              <p>Password: <span className="text-blue-600 font-semibold">admin123</span></p>
-            </div>
+          {/* Customer registration prompt */}
+          <div className="mt-6 pt-5 border-t border-slate-100 text-center">
+            <p className="text-sm text-slate-600">
+              New to our transport services?{' '}
+              <Link
+                href="/register"
+                className="text-sky-600 hover:text-sky-700 font-semibold inline-flex items-center gap-1 hover:underline ml-1"
+              >
+                <UserPlus size={15} />
+                <span>Create customer account</span>
+              </Link>
+            </p>
           </div>
+
+          <div className="mt-5 p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-center">
+            <p className="text-xs text-slate-500">
+              Need corporate rates or custom fleet contracts?{' '}
+              <Link href="/request-quotation" className="text-sky-600 font-medium hover:underline">
+                Request a formal quotation
+              </Link>
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="bg-slate-50 px-8 py-3.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck size={14} className="text-emerald-500" />
+            <span>256-Bit Encrypted Session</span>
+          </div>
+          <span>FleetFlow Suite v2.6</span>
         </div>
       </div>
     </div>

@@ -11,6 +11,8 @@ export interface ICustomer extends Document {
   outstandingBalance: number;
   notes?: string;
   status: 'Active' | 'Inactive';
+  userId?: mongoose.Types.ObjectId;
+  customerCompany?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +33,8 @@ const CustomerSchema = new Schema<ICustomer>(
     outstandingBalance: { type: Number, default: 0 },
     notes: { type: String },
     status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
+    userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    customerCompany: { type: Schema.Types.ObjectId, ref: 'CustomerCompany' },
   },
   { timestamps: true }
 );

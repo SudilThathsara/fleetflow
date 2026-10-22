@@ -1,13 +1,86 @@
 # FleetFlow Lanka (Pvt) Ltd
-### Enterprise Vehicle, Driver, Fleet Maintenance & Transport Operations Management Suite
+### Enterprise Tourism, Vehicle-Hire & Transport Operations Management Suite
 
-FleetFlow Lanka is structured into two completely separate, independent projects inside `fleetflow`:
+FleetFlow Lanka is a production-oriented web platform built on **Next.js App Router, TypeScript, Tailwind CSS, and MongoDB Atlas**. It seamlessly integrates three modules into a single, cohesive architecture:
 
-```
-fleetflow/
-├── frontend/    --> Next.js (App Router) + TypeScript + Tailwind CSS (Ready for Vercel)
-└── backend/     --> Node.js + Express + Mongoose REST API (Ready for Render)
-```
+1. **Public Business Website** — A multi-page public portal for vehicle hire, double cabs, passenger vans, monthly corporate transport, and island-wide tours.
+2. **Customer Portal & Authentication** — A customer portal with secure signup, email verification, password recovery, live quotation requests, quotation approvals, booking management, PDF downloads, and support tickets.
+3. **Internal Transport Management System (TMS)** — Comprehensive management for vehicles, drivers, customer companies, annual contracts, daily running charts, spare-parts inventory, periodic maintenance, driver EPF/ETF payroll, invoices, and social CRM leads.
+
+---
+
+## 🚀 Live Route Directory
+
+### 1. Public Business Website
+| Route | Purpose & Key Features |
+|---|---|
+| `/` | **Homepage**: Hero banner, quick enquiry form, service spotlights, fleet highlights, FAQs, testimonials, island-wide service hubs, footer. |
+| `/about` | **About Us**: Operating philosophy, fleet maintenance policies, driver safety standards, mission. |
+| `/services` | **Services Directory**: Overview of monthly corporate hire, double-cab pickups, passenger vans, daily hire, and project SLAs. |
+| `/services/monthly-vehicle-hire` | **Monthly Corporate Hire**: 3,000 KM base agreements, replacement guarantees, running chart reconciliation, dedicated quote request. |
+| `/services/double-cab-hire` | **Double-Cab Hire (4x4)**: Toyota Hilux, Isuzu D-Max, Mitsubishi L200 pickups for highway packages and civil engineering sites. |
+| `/services/van-hire` | **Passenger Van Hire**: Toyota KDH Commuter and high-roof luxury vans with dual A/C for up to 14 passengers. |
+| `/services/daily-hire` | **Daily & Short-Term Hire**: 1-day hires, 2-day outstation round trips, airport transfers, interactive booking enquiry form. |
+| `/corporate-transport` | **Corporate Fleet SLAs**: Annual master service agreements, multi-vehicle deployments, consolidated monthly VAT billing. |
+| `/fleet` | **Public Fleet Catalogue**: Publicly approved vehicle catalogue with strict field-level privacy (no GPS, internal IDs, or owner records). |
+| `/contact` | **Contact Desk**: Direct phone hotlines, WhatsApp chat link, office address, operating hours, and CRM contact form. |
+| `/request-quotation` | **Formal Quotation Request**: Comprehensive quotation builder generating reference IDs (`REQ-2026-XXXXX`) connected to CRM. |
+| `/request-booking` | **Reserve a Vehicle**: Booking enquiry generator creating pending booking references (`BREQ-2026-XXXXX`). |
+| `/faq` | **Searchable FAQ**: Categorized accordion answering common questions on mileage, overtime, invoicing, and drivers. |
+| `/privacy` | **Privacy Policy**: Transparent explanation of data handling, encryption, and confidentiality safeguards. |
+| `/terms` | **Terms & Conditions**: Non-binding online enquiry terms, running chart rules, and replacement SLAs. |
+| `/sitemap.xml` & `/robots.txt` | **Search Engine Optimization**: Automatically generated sitemaps and search bot access rules. |
+
+---
+
+### 2. Authentication & Account Recovery
+| Route | Functionality |
+|---|---|
+| `/login` | **Unified Login**: Role-based redirection (Customers $\rightarrow$ `/portal`, Staff $\rightarrow$ `/dashboard`), password show/hide, remember me, rate-limited. |
+| `/register` | **Customer Registration**: Creates Customer User + Customer profile with bcrypt hashing and single-use email verification token. Public registrants are strictly assigned the `customer` role. |
+| `/verify-email` | **Email Verification**: Validates expiring cryptographic tokens and marks accounts as verified. |
+| `/forgot-password` | **Password Recovery**: Neutral confirmation response (prevents account enumeration) and dispatches single-use reset links. |
+| `/reset-password` | **Reset Password**: Validates token expiry, hashes new password with bcrypt, and invalidates the token. |
+| `/unauthorized` | **Access Control**: Friendly permission-denied screen with routing back to authorized consoles. |
+
+---
+
+### 3. Customer Portal (`/portal`)
+| Route | Capabilities |
+|---|---|
+| `/portal` | **Portal Overview**: Stat cards (Active Bookings, Pending Quotes, Unpaid Invoices, Support Tickets), recent requests, outstanding balances. |
+| `/portal/quotation-requests` | **Quotation Requests**: Complete submission history, live status tracking (`Pending`, `Under Review`, `Quoted`), link to formal quotes. |
+| `/portal/quotations` | **Formal Quotations**: Published quotation documents, itemized rates, validity periods, client Acceptance/Rejection actions, and jsPDF download. |
+| `/portal/bookings` | **My Bookings**: Real-time vehicle assignments, trip dates, pickup/destination routes, chauffeur assignments, modification requests. |
+| `/portal/invoices` | **Invoices & Billing**: Monthly fleet statements, balance due tracking, VAT itemization, bank transfer instructions, and PDF download. |
+| `/portal/payments` | **Receipts**: Official payment records, bank transfer references, and cleared transaction receipts. |
+| `/portal/documents` | **Secure Document Archive**: Private, customer-authorized agreements, quotation PDFs, and verified tax statements. |
+| `/portal/support` | **Support Desk**: Multi-threaded support tickets for bookings, quotations, or invoicing inquiries with real-time updates. |
+| `/portal/companies` | **Corporate Profiles**: Affiliated customer corporate entities, BR numbers, tax IDs, and billing preferences. |
+| `/portal/profile` | **Profile & Security**: Contact information, default billing addresses, and secure password updates. |
+
+---
+
+### 4. Internal Management Application (TMS)
+*Accessible to staff users via root routes or `/app/*` rewrites:*
+- `/dashboard` / `/app/dashboard` — Enterprise fleet statistics, active contracts, and monthly revenue.
+- `/vehicles` / `/app/vehicles` — Complete vehicle registry, odometers, service intervals, and public fleet publication toggles.
+- `/drivers` / `/app/drivers` — Driver rosters, contact records, licensing, and EPF/ETF statutory details.
+- `/companies` / `/app/companies` — Corporate customer entities and project affiliations.
+- `/contracts` / `/app/contracts` — Annual contracts, rate versions, and monthly base allowances.
+- `/bookings` / `/app/bookings` — Operational booking verification, vehicle dispatch, and driver assignment.
+- `/running-charts` / `/app/running-charts` — Daily odometer tracking, extra-kilometres, and driver overtime reconciliation.
+- `/inventory` / `/app/inventory` — Spare-parts inventory, unit costs, and transaction ledgers.
+- `/maintenance` / `/app/maintenance` — Periodic workshop servicing, oil change logs, and spare-parts usage.
+- `/billing-engine` / `/app/billing-engine` — Automated monthly billing calculation engine.
+- `/payroll` / `/app/payroll` — Statutory Sri Lankan EPF (8% / 12%) and ETF (3%) salary periods.
+- `/invoices` / `/app/invoices` — Tax invoice generation, payment receipts, and balance tracking.
+- `/quotations` / `/app/quotations` — Internal quotation drafting, approval, and publishing to customer portal.
+- `/payments` / `/app/payments` — Recording incoming bank transfers, cheques, and cash payments.
+- `/expenses` / `/app/expenses` — Fuel, repairs, and general operational expenses.
+- `/social-leads` / `/app/social-leads` — Lead CRM queue capturing website contact forms and quotation requests.
+- `/users` / `/app/users` — Role-based access control and staff management.
+- `/settings` / `/app/settings` — Company branding, statutory rates, bank accounts, and **Public Website CMS**.
 
 ---
 
@@ -19,75 +92,38 @@ fleetflow/
 
 ---
 
-## 💻 Local Development Setup
+## 💻 Local Execution Guide
 
-To run both services locally, open two separate terminal windows:
+To run the unified Next.js application:
 
-### Terminal 1: Backend (Express.js on Port 5000)
-```bash
-cd "d:\Intern\Rent vehicle\fleetflow\backend"
-npm run dev
-```
-- Starts the Express REST API server with nodemon at `http://localhost:5000`.
-- Health check endpoint: `http://localhost:5000/api/health`.
-
-### Terminal 2: Frontend (Next.js on Port 3000)
 ```bash
 cd "d:\Intern\Rent vehicle\fleetflow\frontend"
 npm run dev
 ```
-- Starts the Next.js development server at `http://localhost:3000`.
-- Proxies `/api/*` requests to `http://localhost:5000`.
+
+- Application runs at: `http://localhost:3000`
+- Public Website: `http://localhost:3000/`
+- Customer Portal: `http://localhost:3000/portal`
+- Management Dashboard: `http://localhost:3000/dashboard` or `http://localhost:3000/app/dashboard`
 
 ---
 
-## ☁️ Production Deployment Guide
+## 🧪 Automated Acceptance Verification Test Suite
 
-### 1. Backend Deployment on Render (Web Service)
-1. In your Render Dashboard, click **New +** -> **Web Service**.
-2. Connect your Git repository.
-3. Configure the service settings:
-   - **Root Directory:** `backend`
-   - **Runtime:** `Node`
-   - **Build Command:** `npm install`
-   - **Start Command:** `npm start` (or `node server.js`)
-4. Add Environment Variables in Render:
-   - `PORT`: `5000` (Render will set this dynamically, but `process.env.PORT` handles it)
-   - `MONGODB_URI`: `mongodb+srv://sudilthathsara19_db_user:JRekPIJDyPvd5rX9@cluster0.xqk8qbk.mongodb.net/fleetflow_db?retryWrites=true&w=majority`
-   - `JWT_SECRET`: `fleetflow_enterprise_secure_jwt_token_secret_key_2026`
-   - `NEXT_PUBLIC_APP_NAME`: `FleetFlow Lanka`
-5. Click **Create Web Service**. Your backend will be deployed at `https://<your-render-backend-url>.onrender.com`.
+To run the end-to-end acceptance scenarios (Scenarios A through I):
 
-### 2. Frontend Deployment on Vercel
-1. In your Vercel Dashboard, click **Add New...** -> **Project**.
-2. Select your repository.
-3. In the project configuration:
-   - **Root Directory:** Click Edit and select `frontend`.
-   - **Framework Preset:** `Next.js`
-4. Add Environment Variables in Vercel:
-   - `NEXT_PUBLIC_BACKEND_URL`: `https://<your-render-backend-url>.onrender.com`
-   - `MONGODB_URI`: `mongodb+srv://sudilthathsara19_db_user:JRekPIJDyPvd5rX9@cluster0.xqk8qbk.mongodb.net/fleetflow_db?retryWrites=true&w=majority`
-   - `JWT_SECRET`: `fleetflow_enterprise_secure_jwt_token_secret_key_2026`
-   - `NEXT_PUBLIC_APP_NAME`: `FleetFlow Lanka`
-5. Click **Deploy**. Vercel will build and host your Next.js application globally with high-speed CDN and automatic API proxying.
+```bash
+cd "d:\Intern\Rent vehicle\fleetflow\frontend"
+node test_integrated_platform.js
+```
 
----
-
-## 👥 User Management & Staff Password Updates (Like Raxwo)
-
-FleetFlow includes a complete staff management and role-based permissions dashboard at `/users`:
-1. **Roles Available**:
-   - `super_admin`: Full system control, permissions, user management & deletion.
-   - `manager`: Bookings, trip assignments, rates and operations.
-   - `accountant`: Financial entries, invoices, driver settlements, expenses.
-   - `operations`: Vehicles, running charts, drivers, and daily bookings.
-   - `maintenance`: Workshop records, inspections and service logs.
-   - `auditor`: Read-only access to records and financial summaries.
-
-2. **Admin Password Reset**:
-   - Super Admins can update any staff user's password directly using the **Key (🔑)** button in the actions column.
-   - The user can immediately log in with their updated password.
-
-Default Super Admin Login
-Email: admin@fleetflow.lk
-Password: admin123
+All 9 acceptance scenarios test:
+1. Public website enquiry persistence in MongoDB
+2. Secure customer registration and role isolation
+3. JWT session verification and role redirection
+4. Single-use password reset token consumption
+5. Quotation request to formal quotation workflow
+6. Booking request to operational confirmation
+7. Monthly invoice generation and settlement
+8. Field-level privacy and private asset protection
+9. Full backwards compatibility with all existing TMS modules.

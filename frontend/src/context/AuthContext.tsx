@@ -13,7 +13,7 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, pass: string) => Promise<{ success: boolean; message?: string }>;
+  login: (email: string, pass: string) => Promise<{ success: boolean; message?: string; redirectUrl?: string; role?: string }>;
   logout: () => Promise<void>;
   updateUser: (updatedData: Partial<User>) => void;
   refreshUser: () => Promise<void>;
@@ -139,7 +139,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             document.cookie = `token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
           }
         }
-        return { success: true };
+        return {
+          success: true,
+          redirectUrl: data.redirectUrl || (u.role === 'customer' ? '/portal' : '/dashboard'),
+          role: u.role,
+        };
       }
       return { success: false, message: data.message || 'Login failed' };
     } catch (err: any) {

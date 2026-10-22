@@ -10,16 +10,20 @@ const nextConfig: NextConfig = {
     },
   },
   async rewrites() {
+    const rewritesList: any[] = [
+      {
+        source: '/app/:path*',
+        destination: '/:path*',
+      },
+    ];
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (backendUrl) {
-      return [
-        {
-          source: '/api/:path*',
-          destination: `${backendUrl}/api/:path*`,
-        },
-      ];
+      rewritesList.push({
+        source: '/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
+      });
     }
-    return [];
+    return rewritesList;
   },
 };
 

@@ -26,6 +26,10 @@ export interface IVehicle {
   nextServiceDate?: Date;
   status: 'Available' | 'Booked' | 'On Trip' | 'Under Maintenance' | 'Inactive' | 'Retired';
   notes?: string;
+  isPublishedToFleet?: boolean;
+  publicDescription?: string;
+  publicPhotos?: string[];
+  publicFeatures?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -64,6 +68,10 @@ const VehicleSchema = new Schema<IVehicle>(
       default: 'Available',
     },
     notes: { type: String },
+    isPublishedToFleet: { type: Boolean, default: false },
+    publicDescription: { type: String },
+    publicPhotos: [{ type: String }],
+    publicFeatures: [{ type: String }],
   },
   { timestamps: true }
 );
