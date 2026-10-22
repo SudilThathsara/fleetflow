@@ -1,173 +1,257 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Truck,
-  Phone,
-  MessageSquare,
-  Menu,
-  X,
-  User,
-  FileText,
-  ChevronDown,
-  Shield,
-  Clock,
-  Sparkles,
+  Truck, Phone, MessageSquare, Menu, X, User, FileText,
+  ChevronDown, Shield, Clock, Building2, Users, Calendar,
+  Car, Globe,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+
+interface BrandingData {
+  businessName: string;
+  tagline: string;
+  logoUrl: string;
+  phone: string;
+  whatsappNumber: string;
+  businessHours: string;
+  servicesEnabled: {
+    monthlyHire?: boolean;
+    doubleCabHire?: boolean;
+    vanHire?: boolean;
+    dailyHire?: boolean;
+    corporateHire?: boolean;
+  };
+}
+
+const DEFAULTS: BrandingData = {
+  businessName: 'Lanka Premier Transport',
+  tagline: 'Vehicle Hire & Corporate Fleet Solutions',
+  logoUrl: '',
+  phone: '+94 11 234 5678',
+  whatsappNumber: '+94771234567',
+  businessHours: 'Mon–Sat 7 AM–8 PM | 24/7 Dispatch',
+  servicesEnabled: {
+    monthlyHire: true,
+    doubleCabHire: true,
+    vanHire: true,
+    dailyHire: true,
+    corporateHire: true,
+  },
+};
+
+interface NavItem {
+  name: string;
+  href: string;
+  subItems?: { name: string; href: string; icon?: React.ElementType }[];
+}
 
 export const PublicHeader: React.FC = () => {
   const pathname = usePathname();
   const { user } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
-  const [branding, setBranding] = useState({
-    businessName: 'Lanka Premier Transport',
-    tagline: 'Vehicle Hire & Corporate Fleet Solutions',
-    logoUrl: '',
-    phone: '+94 11 234 5678',
-    whatsappNumber: '+94771234567',
-  });
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [servicesOpen, setServicesOpen] = useState(false);
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
+  const [branding, setBranding] = useState<BrandingData>(DEFAULTS);
+  const [scrolled, setScrolled] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     fetch('/api/public/content')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.data) {
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.data) {
           setBranding({
-            businessName: data.data.businessName || 'Lanka Premier Transport',
-            tagline: data.data.tagline || 'Vehicle Hire & Corporate Fleet Solutions',
-            logoUrl: data.data.logoUrl || '',
-            phone: data.data.phone?.split('/')[0]?.trim() || '+94 11 234 5678',
-            whatsappNumber: data.data.whatsappNumber || '+94771234567',
+            businessName: d.data.businessName || DEFAULTS.businessName,
+            tagline: d.data.tagline || DEFAULTS.tagline,
+            logoUrl: d.data.logoUrl || '',
+            phone: (d.data.phone || DEFAULTS.phone).split('/')[0].trim(),
+            whatsappNumber: d.data.whatsappNumber || DEFAULTS.whatsappNumber,
+            businessHours: d.data.businessHours || DEFAULTS.businessHours,
+            servicesEnabled: d.data.servicesEnabled || DEFAULTS.servicesEnabled,
           });
         }
       })
       .catch(() => {});
   }, []);
 
-  const navLinks = [
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setServicesOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+    setMobileServicesOpen(false);
+  }, [pathname]);
+
+  const cleanWA = branding.whatsappNumber.replace(/[^0-9]/g, '');
+  const cleanPhone = branding.phone.replace(/[^0-9+]/g, '');
+
+  const serviceSubItems = [
+    { name: 'All Services', href: '/services', icon: Globe },
+    ...(branding.servicesEnabled.monthlyHire
+      ? [{ name: 'Monthly Corporate Hire', href: '/services/monthly-vehicle-hire', icon: Building2 }]
+      : []),
+    ...(branding.servicesEnabled.doubleCabHire
+      ? [{ name: 'Double-Cab Hire (4×4)', href: '/services/double-cab-hire', icon: Truck }]
+      : []),
+    ...(branding.servicesEnabled.vanHire
+      ? [{ name: 'Passenger Van Hire', href: '/services/van-hire', icon: Users }]
+      : []),
+    ...(branding.servicesEnabled.dailyHire
+      ? [{ name: 'Daily & Short-Term Hire', href: '/services/daily-hire', icon: Calendar }]
+      : []),
+  ];
+
+  const navLinks: NavItem[] = [
     { name: 'Home', href: '/' },
     { name: 'About Us', href: '/about' },
-    {
-      name: 'Services',
-      href: '/services',
-      hasDropdown: true,
-      subItems: [
-        { name: 'All Services Overview', href: '/services' },
-        { name: 'Monthly Corporate Hire', href: '/services/monthly-vehicle-hire' },
-        { name: 'Double-Cab Hire (4x4)', href: '/services/double-cab-hire' },
-        { name: 'Passenger Van Hire', href: '/services/van-hire' },
-        { name: 'Daily & Short-Term Hire', href: '/services/daily-hire' },
-      ],
-    },
+    { name: 'Services', href: '/services', subItems: serviceSubItems },
     { name: 'Corporate Transport', href: '/corporate-transport' },
     { name: 'Our Fleet', href: '/fleet' },
     { name: 'FAQ', href: '/faq' },
     { name: 'Contact', href: '/contact' },
   ];
 
-  const cleanWhatsAppNumber = branding.whatsappNumber.replace(/[^0-9]/g, '');
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname.startsWith(href);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-      {/* Top micro banner */}
-      <div className="bg-slate-900 text-slate-300 text-xs py-1.5 px-4 hidden md:block">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-6">
+    <header
+      className={`sticky top-0 z-50 transition-shadow duration-300 ${
+        scrolled
+          ? 'bg-white shadow-md shadow-slate-200/60 border-b border-slate-200'
+          : 'bg-white/95 backdrop-blur-md border-b border-slate-100'
+      }`}
+    >
+      {/* ── Top micro-bar (desktop only) ── */}
+      <div className="hidden md:block bg-slate-900 text-slate-300 text-[11px] py-1.5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-5">
             <span className="flex items-center gap-1.5">
-              <Clock size={13} className="text-sky-400" />
-              <span>Daily Dispatch & 24/7 Roadside Assistance: Island-wide</span>
+              <Clock size={11} className="text-sky-400 shrink-0" />
+              <span className="truncate">{branding.businessHours}</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <Shield size={13} className="text-emerald-400" />
-              <span>Commercial Insurance & Verified Drivers</span>
+              <Shield size={11} className="text-emerald-400 shrink-0" />
+              <span>Commercially Insured · Verified Drivers</span>
             </span>
           </div>
           <div className="flex items-center gap-4">
             <a
-              href={`tel:${branding.phone.replace(/[^0-9+]/g, '')}`}
-              className="flex items-center gap-1 text-slate-200 hover:text-white transition"
+              href={`tel:${cleanPhone}`}
+              className="flex items-center gap-1 hover:text-white transition"
             >
-              <Phone size={12} className="text-sky-400" />
+              <Phone size={11} className="text-sky-400" />
               <span>{branding.phone}</span>
             </a>
             <a
-              href={`https://wa.me/${cleanWhatsAppNumber}`}
+              href={`https://wa.me/${cleanWA}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-medium transition"
+              className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-semibold transition"
             >
-              <MessageSquare size={12} />
+              <MessageSquare size={11} />
               <span>WhatsApp Us</span>
             </a>
           </div>
         </div>
       </div>
 
-      {/* Main navigation bar */}
+      {/* ── Main nav bar ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Brand Logo & Name */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-slate-900 via-sky-900 to-sky-600 flex items-center justify-center shadow-md shadow-sky-600/20 group-hover:scale-105 transition overflow-hidden p-1.5">
+        <div className="flex items-center justify-between h-16 lg:h-[68px]">
+
+          {/* Brand */}
+          <Link href="/" className="flex items-center gap-2.5 group shrink-0" onClick={() => setMobileOpen(false)}>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-900 via-sky-900 to-sky-600 flex items-center justify-center shadow-md shadow-sky-600/20 group-hover:scale-105 transition overflow-hidden p-1.5">
               {branding.logoUrl ? (
                 <img src={branding.logoUrl} alt={branding.businessName} className="h-full w-full object-contain" />
               ) : (
-                <Truck className="text-white" size={24} />
+                <Truck className="text-white" size={22} />
               )}
             </div>
-            <div>
-              <span className="block font-bold text-slate-900 text-lg leading-tight tracking-tight">
+            <div className="hidden sm:block">
+              <span className="block font-bold text-slate-900 text-[15px] leading-tight tracking-tight">
                 {branding.businessName}
               </span>
-              <span className="block text-xs text-sky-600 font-medium tracking-wide">
+              <span className="block text-[10px] text-sky-600 font-medium tracking-wide leading-tight">
                 {branding.tagline}
               </span>
             </div>
           </Link>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+          {/* Desktop nav */}
+          <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1">
             {navLinks.map((link) => {
-              const isActive = pathname === link.href || (link.hasDropdown && pathname.startsWith(link.href));
-              if (link.hasDropdown) {
+              const active = isActive(link.href);
+              if (link.subItems) {
                 return (
                   <div
                     key={link.name}
+                    ref={dropdownRef}
                     className="relative"
-                    onMouseEnter={() => setServicesDropdownOpen(true)}
-                    onMouseLeave={() => setServicesDropdownOpen(false)}
+                    onMouseEnter={() => setServicesOpen(true)}
+                    onMouseLeave={() => setServicesOpen(false)}
                   >
-                    <Link
-                      href={link.href}
-                      className={`px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1 ${
-                        isActive
+                    <button
+                      onClick={() => setServicesOpen((p) => !p)}
+                      className={`px-3 py-2 rounded-lg text-[13px] font-semibold transition flex items-center gap-1 ${
+                        active
                           ? 'text-sky-600 bg-sky-50'
                           : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
                       }`}
                     >
                       <span>{link.name}</span>
-                      <ChevronDown size={14} className="opacity-70" />
-                    </Link>
+                      <ChevronDown
+                        size={13}
+                        className={`transition-transform ${servicesOpen ? 'rotate-180 text-sky-500' : 'opacity-60'}`}
+                      />
+                    </button>
 
-                    {servicesDropdownOpen && (
-                      <div className="absolute top-full left-0 w-64 bg-white rounded-xl shadow-xl border border-slate-100 py-2 animate-in fade-in slide-in-from-top-2 duration-150 z-50">
-                        {link.subItems?.map((sub) => (
+                    {/* Dropdown panel */}
+                    <div
+                      className={`absolute top-full left-0 w-60 bg-white rounded-xl shadow-xl shadow-slate-200/80 border border-slate-100 py-1.5 z-50 transition-all duration-150 origin-top ${
+                        servicesOpen
+                          ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
+                          : 'opacity-0 scale-95 -translate-y-1 pointer-events-none'
+                      }`}
+                    >
+                      {link.subItems.map((sub) => {
+                        const Icon = sub.icon;
+                        return (
                           <Link
-                            key={sub.name}
+                            key={sub.href}
                             href={sub.href}
-                            className={`block px-4 py-2.5 text-xs font-semibold hover:bg-slate-50 transition ${
-                              pathname === sub.href ? 'text-sky-600 bg-sky-50/50' : 'text-slate-700'
+                            onClick={() => setServicesOpen(false)}
+                            className={`flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-semibold transition ${
+                              pathname === sub.href
+                                ? 'text-sky-600 bg-sky-50/70'
+                                : 'text-slate-700 hover:text-sky-600 hover:bg-slate-50'
                             }`}
                           >
-                            {sub.name}
+                            {Icon && <Icon size={14} className="text-sky-500 shrink-0" />}
+                            <span>{sub.name}</span>
                           </Link>
-                        ))}
-                      </div>
-                    )}
+                        );
+                      })}
+                    </div>
                   </div>
                 );
               }
@@ -175,8 +259,8 @@ export const PublicHeader: React.FC = () => {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition ${
-                    isActive
+                  className={`px-3 py-2 rounded-lg text-[13px] font-semibold transition ${
+                    active
                       ? 'text-sky-600 bg-sky-50'
                       : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
                   }`}
@@ -187,144 +271,180 @@ export const PublicHeader: React.FC = () => {
             })}
           </nav>
 
-          {/* Right Action Buttons */}
-          <div className="hidden sm:flex items-center gap-3">
+          {/* Right CTA (desktop + tablet) */}
+          <div className="hidden sm:flex items-center gap-2">
             {user ? (
               <Link
                 href={user.role === 'customer' ? '/portal' : '/dashboard'}
-                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-semibold flex items-center gap-2 transition"
+                className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[13px] font-semibold flex items-center gap-1.5 transition"
               >
-                <User size={16} className="text-sky-600" />
-                <span>{user.role === 'customer' ? 'My Portal' : 'Staff Dashboard'}</span>
+                <User size={15} className="text-sky-600" />
+                <span className="hidden md:inline">
+                  {user.role === 'customer' ? 'My Portal' : 'Dashboard'}
+                </span>
               </Link>
             ) : (
               <Link
                 href="/login"
-                className="px-3.5 py-2.5 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 text-sm font-semibold flex items-center gap-1.5 transition"
+                className="px-3.5 py-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 text-[13px] font-semibold flex items-center gap-1.5 transition"
               >
-                <User size={16} className="text-slate-500" />
-                <span>Sign In</span>
+                <User size={15} className="text-slate-400" />
+                <span className="hidden md:inline">Sign In</span>
               </Link>
             )}
-
             <Link
               href="/request-quotation"
-              className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold shadow-md shadow-sky-600/25 flex items-center gap-2 transition"
+              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-[13px] font-bold shadow-md shadow-sky-600/25 flex items-center gap-1.5 transition"
             >
-              <FileText size={16} />
+              <FileText size={14} />
               <span>Get Quotation</span>
             </Link>
           </div>
 
-          {/* Mobile hamburger toggle */}
+          {/* Mobile hamburger */}
           <div className="flex items-center gap-2 lg:hidden">
             <Link
               href="/request-quotation"
-              className="px-3 py-1.5 rounded-lg bg-sky-600 text-white text-xs font-semibold flex items-center gap-1 sm:hidden"
+              className="sm:hidden px-3 py-1.5 rounded-lg bg-sky-600 text-white text-[11px] font-bold flex items-center gap-1"
             >
-              <FileText size={14} />
-              <span>Quote</span>
+              <FileText size={13} />
+              Quote
             </Link>
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => setMobileOpen((p) => !p)}
               className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
-              aria-label="Toggle mobile menu"
+              aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile drawer */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 space-y-1 shadow-2xl animate-in slide-in-from-top-4 duration-200">
-          <div className="pt-2 pb-3 border-b border-slate-100">
-            {navLinks.map((link) => (
-              <div key={link.name}>
+      {/* ── Mobile drawer ── */}
+      <div
+        className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          mobileOpen ? 'max-h-[90vh] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="bg-white border-t border-slate-100 shadow-xl px-4 pt-3 pb-6 overflow-y-auto max-h-[80vh]">
+
+          {/* Nav links */}
+          <div className="space-y-0.5 pb-3 border-b border-slate-100">
+            {navLinks.map((link) => {
+              const active = isActive(link.href);
+              if (link.subItems) {
+                return (
+                  <div key={link.name}>
+                    <button
+                      onClick={() => setMobileServicesOpen((p) => !p)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[14px] font-semibold transition ${
+                        active ? 'text-sky-600 bg-sky-50' : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span>{link.name}</span>
+                      <ChevronDown
+                        size={16}
+                        className={`transition-transform text-slate-400 ${mobileServicesOpen ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+                    {mobileServicesOpen && (
+                      <div className="pl-4 mt-0.5 space-y-0.5 pb-1">
+                        {link.subItems.map((sub) => {
+                          const Icon = sub.icon;
+                          return (
+                            <Link
+                              key={sub.href}
+                              href={sub.href}
+                              onClick={() => setMobileOpen(false)}
+                              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-semibold transition ${
+                                pathname === sub.href
+                                  ? 'text-sky-600 bg-sky-50'
+                                  : 'text-slate-600 hover:text-sky-600 hover:bg-slate-50'
+                              }`}
+                            >
+                              {Icon && <Icon size={13} className="text-sky-500" />}
+                              <span>{sub.name}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              return (
                 <Link
+                  key={link.name}
                   href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-lg text-base font-medium ${
-                    pathname === link.href ? 'text-sky-600 bg-sky-50 font-semibold' : 'text-slate-700'
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center px-3 py-2.5 rounded-xl text-[14px] font-semibold transition ${
+                    active ? 'text-sky-600 bg-sky-50' : 'text-slate-700 hover:bg-slate-50'
                   }`}
                 >
                   {link.name}
                 </Link>
-                {link.hasDropdown && (
-                  <div className="pl-6 space-y-1 my-1">
-                    {link.subItems?.map((sub) => (
-                      <Link
-                        key={sub.name}
-                        href={sub.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="block px-3 py-1.5 text-xs text-slate-600 hover:text-sky-600"
-                      >
-                        • {sub.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
 
+          {/* Auth + CTA buttons */}
           <div className="pt-3 space-y-2">
             {user ? (
               <Link
                 href={user.role === 'customer' ? '/portal' : '/dashboard'}
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-2.5 px-4 rounded-xl bg-slate-900 text-white font-semibold text-sm flex items-center justify-center gap-2"
+                onClick={() => setMobileOpen(false)}
+                className="w-full py-3 px-4 rounded-xl bg-slate-900 text-white font-bold text-[13px] flex items-center justify-center gap-2"
               >
-                <User size={16} />
-                <span>{user.role === 'customer' ? 'Customer Portal' : 'Staff Dashboard'}</span>
+                <User size={15} />
+                {user.role === 'customer' ? 'Customer Portal' : 'Staff Dashboard'}
               </Link>
             ) : (
               <div className="grid grid-cols-2 gap-2">
                 <Link
                   href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="py-2.5 px-3 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm text-center"
+                  onClick={() => setMobileOpen(false)}
+                  className="py-2.5 px-3 rounded-xl border border-slate-200 text-slate-700 font-semibold text-[13px] text-center hover:bg-slate-50 transition"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/register"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="py-2.5 px-3 rounded-xl bg-sky-50 text-sky-700 font-semibold text-sm text-center"
+                  onClick={() => setMobileOpen(false)}
+                  className="py-2.5 px-3 rounded-xl bg-sky-50 text-sky-700 font-semibold text-[13px] text-center hover:bg-sky-100 transition"
                 >
                   Register
                 </Link>
               </div>
             )}
-
             <Link
               href="/request-quotation"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full py-2.5 px-4 rounded-xl bg-sky-600 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-md"
+              onClick={() => setMobileOpen(false)}
+              className="w-full py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-[13px] flex items-center justify-center gap-2 shadow-md shadow-sky-600/20 transition"
             >
-              <FileText size={16} />
-              <span>Request a Quotation</span>
+              <FileText size={15} />
+              Request a Quotation
             </Link>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <a href={`tel:${branding.phone.replace(/[^0-9+]/g, '')}`} className="flex items-center gap-1.5">
+          {/* Contact strip */}
+          <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+            <a href={`tel:${cleanPhone}`} className="flex items-center gap-1.5 text-[12px] text-slate-600">
               <Phone size={13} className="text-sky-600" />
-              <span>{branding.phone}</span>
+              {branding.phone}
             </a>
             <a
-              href={`https://wa.me/${cleanWhatsAppNumber}`}
+              href={`https://wa.me/${cleanWA}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-emerald-600 font-medium"
+              className="flex items-center gap-1.5 text-[12px] text-emerald-600 font-semibold"
             >
               <MessageSquare size={13} />
-              <span>WhatsApp</span>
+              WhatsApp
             </a>
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 };

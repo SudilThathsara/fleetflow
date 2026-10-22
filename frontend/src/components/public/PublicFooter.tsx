@@ -3,215 +3,247 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  Truck,
-  Phone,
-  Mail,
-  MapPin,
-  Clock,
-  ShieldCheck,
-  ArrowRight,
-  ExternalLink,
-  MessageSquare,
+  Truck, Phone, Mail, MapPin, Clock, MessageSquare,
+  Globe, Globe2, Link2, ExternalLink, Share2, Video,
+  ArrowRight, Shield,
 } from 'lucide-react';
 
+interface SiteContent {
+  businessName: string;
+  tagline: string;
+  phone: string;
+  whatsappNumber: string;
+  publicEmail: string;
+  address: string;
+  businessHours: string;
+  brNumberPlaceholder: string;
+  logoUrl: string;
+  socialLinks: { facebook?: string; instagram?: string; linkedin?: string; youtube?: string; whatsapp?: string };
+  servicesEnabled: { monthlyHire?: boolean; doubleCabHire?: boolean; vanHire?: boolean; dailyHire?: boolean; corporateHire?: boolean; tourismTravel?: boolean; projectTransport?: boolean };
+}
+
+const DEF: SiteContent = {
+  businessName: 'Lanka Premier Transport & Vehicle Hire',
+  tagline: 'Reliable Vehicle Hire & Corporate Transport Solutions in Sri Lanka',
+  phone: '+94 11 234 5678 / +94 77 123 4567',
+  whatsappNumber: '+94771234567',
+  publicEmail: 'inquiries@transportlanka.lk',
+  address: 'No. 142/B, High Level Road, Nugegoda, Sri Lanka',
+  businessHours: 'Monday – Saturday: 7:00 AM – 8:00 PM | 24/7 Roadside Assistance & Dispatch',
+  brNumberPlaceholder: 'PV-98765/2024',
+  logoUrl: '',
+  socialLinks: {},
+  servicesEnabled: { monthlyHire: true, doubleCabHire: true, vanHire: true, dailyHire: true, corporateHire: true },
+};
+
 export const PublicFooter: React.FC = () => {
-  const [content, setContent] = useState({
-    businessName: 'Lanka Premier Transport & Vehicle Hire',
-    tagline: 'Reliable Vehicle Hire & Corporate Transport Solutions in Sri Lanka',
-    phone: '+94 11 234 5678 / +94 77 123 4567',
-    whatsappNumber: '+94771234567',
-    publicEmail: 'inquiries@transportlanka.lk',
-    address: 'No. 142/B, High Level Road, Nugegoda, Sri Lanka',
-    businessHours: 'Monday - Saturday: 7:00 AM – 8:00 PM | 24/7 Roadside Assistance',
-    brNumberPlaceholder: 'PV-98765/2024 (Registered Transport Provider)',
-  });
+  const [c, setC] = useState<SiteContent>(DEF);
 
   useEffect(() => {
     fetch('/api/public/content')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.data) {
-          setContent({
-            businessName: data.data.businessName || content.businessName,
-            tagline: data.data.tagline || content.tagline,
-            phone: data.data.phone || content.phone,
-            whatsappNumber: data.data.whatsappNumber || content.whatsappNumber,
-            publicEmail: data.data.publicEmail || content.publicEmail,
-            address: data.data.address || content.address,
-            businessHours: data.data.businessHours || content.businessHours,
-            brNumberPlaceholder: data.data.brNumberPlaceholder || content.brNumberPlaceholder,
-          });
-        }
-      })
+      .then((r) => r.json())
+      .then((d) => { if (d.success && d.data) setC({ ...DEF, ...d.data }); })
       .catch(() => {});
   }, []);
 
-  const cleanWhatsApp = content.whatsappNumber.replace(/[^0-9]/g, '');
+  const cleanWA = c.whatsappNumber.replace(/[^0-9]/g, '');
+  const cleanPhone = c.phone.split('/')[0].trim().replace(/[^0-9+]/g, '');
+
+  const serviceLinks = [
+    c.servicesEnabled.monthlyHire && { label: 'Monthly Corporate Hire', href: '/services/monthly-vehicle-hire' },
+    c.servicesEnabled.doubleCabHire && { label: 'Double-Cab Hire (4×4)', href: '/services/double-cab-hire' },
+    c.servicesEnabled.vanHire && { label: 'Passenger Van Hire', href: '/services/van-hire' },
+    c.servicesEnabled.dailyHire && { label: 'Daily & Short-Term Hire', href: '/services/daily-hire' },
+    c.servicesEnabled.corporateHire && { label: 'Corporate Transport SLAs', href: '/corporate-transport' },
+    c.servicesEnabled.tourismTravel && { label: 'Tourism & Travel', href: '/services' },
+    c.servicesEnabled.projectTransport && { label: 'Project Transport', href: '/services' },
+  ].filter(Boolean) as { label: string; href: string }[];
+
+  const companyLinks = [
+    { label: 'About Us', href: '/about' },
+    { label: 'Our Fleet', href: '/fleet' },
+    { label: 'Contact Us', href: '/contact' },
+    { label: 'FAQ', href: '/faq' },
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Terms & Conditions', href: '/terms' },
+  ];
+
+  const socials = [
+    c.socialLinks.facebook && { icon: Globe2, href: c.socialLinks.facebook, label: 'Facebook', color: 'hover:text-blue-400' },
+    c.socialLinks.instagram && { icon: Share2, href: c.socialLinks.instagram, label: 'Instagram', color: 'hover:text-pink-400' },
+    c.socialLinks.linkedin && { icon: Link2, href: c.socialLinks.linkedin, label: 'LinkedIn', color: 'hover:text-sky-400' },
+    c.socialLinks.youtube && { icon: Video, href: c.socialLinks.youtube, label: 'YouTube', color: 'hover:text-red-400' },
+    c.socialLinks.whatsapp && { icon: MessageSquare, href: c.socialLinks.whatsapp, label: 'WhatsApp', color: 'hover:text-emerald-400' },
+  ].filter(Boolean) as { icon: React.ElementType; href: string; label: string; color: string }[];
 
   return (
-    <footer className="bg-slate-950 text-slate-300 pt-16 pb-12 border-t border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-slate-800">
-          {/* Column 1: Company Profile */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
-                <Truck size={22} />
+    <footer className="bg-slate-950 text-slate-400">
+      {/* Top CTA strip */}
+      <div className="border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <p className="font-bold text-white text-base">Ready to hire a vehicle?</p>
+            <p className="text-sm text-slate-400 mt-0.5">Submit an enquiry or call our operations desk today.</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/request-quotation"
+              className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm flex items-center gap-2 transition shadow-lg shadow-sky-900/30"
+            >
+              Request Quotation <ArrowRight size={15} />
+            </Link>
+            <a
+              href={`https://wa.me/${cleanWA}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-sm flex items-center gap-2 transition"
+            >
+              <MessageSquare size={15} />
+              WhatsApp Us
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Main footer grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+
+          {/* Column 1 — Brand */}
+          <div className="sm:col-span-2 lg:col-span-1">
+            <Link href="/" className="flex items-center gap-2.5 group mb-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 via-sky-900 to-sky-600 flex items-center justify-center overflow-hidden p-1.5 shrink-0">
+                {c.logoUrl ? (
+                  <img src={c.logoUrl} alt={c.businessName} className="h-full w-full object-contain" />
+                ) : (
+                  <Truck size={20} className="text-white" />
+                )}
               </div>
-              <span className="font-bold text-white text-base leading-tight">
-                {content.businessName}
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              {content.tagline}. High-performing double-cab pickups, passenger vans, and long-term corporate vehicle contracts across Sri Lanka.
+              <div>
+                <span className="block font-bold text-white text-sm leading-tight">{c.businessName}</span>
+                <span className="block text-[10px] text-sky-500 leading-tight mt-0.5">{c.tagline.slice(0, 40)}{c.tagline.length > 40 ? '…' : ''}</span>
+              </div>
+            </Link>
+
+            <p className="text-xs leading-relaxed text-slate-500 mb-5">
+              {c.tagline}
             </p>
-            <div className="pt-2">
-              <span className="inline-block px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg text-xs font-mono text-slate-400">
-                {content.brNumberPlaceholder}
-              </span>
+
+            <div className="space-y-2 text-xs">
+              <a href={`tel:${cleanPhone}`} className="flex items-start gap-2 hover:text-sky-400 transition">
+                <Phone size={13} className="text-sky-500 shrink-0 mt-0.5" />
+                <span>{c.phone}</span>
+              </a>
+              <a href={`mailto:${c.publicEmail}`} className="flex items-start gap-2 hover:text-sky-400 transition">
+                <Mail size={13} className="text-sky-500 shrink-0 mt-0.5" />
+                <span>{c.publicEmail}</span>
+              </a>
+              <div className="flex items-start gap-2">
+                <MapPin size={13} className="text-sky-500 shrink-0 mt-0.5" />
+                <span>{c.address}</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <Clock size={13} className="text-sky-500 shrink-0 mt-0.5" />
+                <span>{c.businessHours}</span>
+              </div>
             </div>
+
+            {/* Social icons */}
+            {socials.length > 0 && (
+              <div className="flex items-center gap-3 mt-5">
+                {socials.map((s) => {
+                  const Icon = s.icon;
+                  return (
+                    <a
+                      key={s.label}
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={s.label}
+                      className={`text-slate-500 ${s.color} transition`}
+                    >
+                      <Icon size={18} />
+                    </a>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Column 2: Vehicle & Transport Services */}
+          {/* Column 2 — Services */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 border-l-2 border-sky-500 pl-2.5">
-              Transport Services
-            </h4>
-            <ul className="space-y-2.5 text-xs text-slate-400">
-              <li>
-                <Link href="/services/monthly-vehicle-hire" className="hover:text-sky-400 transition flex items-center gap-1.5">
-                  <ArrowRight size={12} className="text-sky-500" />
-                  <span>Monthly Corporate Vehicle Hire</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/services/double-cab-hire" className="hover:text-sky-400 transition flex items-center gap-1.5">
-                  <ArrowRight size={12} className="text-sky-500" />
-                  <span>Double-Cab 4x4 Pickup Hire</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/services/van-hire" className="hover:text-sky-400 transition flex items-center gap-1.5">
-                  <ArrowRight size={12} className="text-sky-500" />
-                  <span>Passenger & Tourism Van Hire</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/services/daily-hire" className="hover:text-sky-400 transition flex items-center gap-1.5">
-                  <ArrowRight size={12} className="text-sky-500" />
-                  <span>Daily & Short-Term Hire</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/corporate-transport" className="hover:text-sky-400 transition flex items-center gap-1.5">
-                  <ArrowRight size={12} className="text-sky-500" />
-                  <span>Project & Industrial Fleet Solutions</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/fleet" className="hover:text-sky-400 transition flex items-center gap-1.5">
-                  <ArrowRight size={12} className="text-sky-500" />
-                  <span>Approved Public Fleet Catalogue</span>
-                </Link>
-              </li>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Our Services</h4>
+            <ul className="space-y-2">
+              {serviceLinks.slice(0, 7).map((s) => (
+                <li key={s.href + s.label}>
+                  <Link
+                    href={s.href}
+                    className="text-xs text-slate-400 hover:text-sky-400 transition flex items-center gap-1.5"
+                  >
+                    <span className="text-sky-700">›</span> {s.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Column 3: Quick Links & Customer Portal */}
+          {/* Column 3 — Company */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 border-l-2 border-sky-500 pl-2.5">
-              Customer & Legal
-            </h4>
-            <ul className="space-y-2.5 text-xs text-slate-400">
-              <li>
-                <Link href="/request-quotation" className="hover:text-sky-400 transition">
-                  • Request a Quotation
-                </Link>
-              </li>
-              <li>
-                <Link href="/request-booking" className="hover:text-sky-400 transition">
-                  • Book a Vehicle
-                </Link>
-              </li>
-              <li>
-                <Link href="/login" className="hover:text-sky-400 transition">
-                  • Customer Portal Login
-                </Link>
-              </li>
-              <li>
-                <Link href="/register" className="hover:text-sky-400 transition">
-                  • Register Customer Account
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className="hover:text-sky-400 transition">
-                  • Frequently Asked Questions
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="hover:text-sky-400 transition">
-                  • Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="hover:text-sky-400 transition">
-                  • Terms & Hire Conditions
-                </Link>
-              </li>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Company</h4>
+            <ul className="space-y-2">
+              {companyLinks.map((l) => (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    className="text-xs text-slate-400 hover:text-sky-400 transition flex items-center gap-1.5"
+                  >
+                    <span className="text-sky-700">›</span> {l.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Column 4: Contact & Operating Hours */}
+          {/* Column 4 — Portal & Trust */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 border-l-2 border-sky-500 pl-2.5">
-              Contact & Dispatch
-            </h4>
-            <div className="space-y-3 text-xs text-slate-400">
-              <div className="flex items-start gap-2.5">
-                <MapPin size={15} className="text-sky-400 shrink-0 mt-0.5" />
-                <span>{content.address}</span>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Customer Access</h4>
+            <ul className="space-y-2 mb-6">
+              {[
+                { label: 'Customer Portal', href: '/portal' },
+                { label: 'Request a Quotation', href: '/request-quotation' },
+                { label: 'Book a Vehicle', href: '/request-booking' },
+                { label: 'Sign In', href: '/login' },
+                { label: 'Register Account', href: '/register' },
+              ].map((l) => (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    className="text-xs text-slate-400 hover:text-sky-400 transition flex items-center gap-1.5"
+                  >
+                    <span className="text-sky-700">›</span> {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 text-[11px] text-slate-500">
+              <div className="flex items-center gap-1.5 text-emerald-400 font-semibold mb-1">
+                <Shield size={12} />
+                Registered Transport Provider
               </div>
-              <div className="flex items-center gap-2.5">
-                <Phone size={15} className="text-sky-400 shrink-0" />
-                <span>{content.phone}</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Mail size={15} className="text-sky-400 shrink-0" />
-                <span>{content.publicEmail}</span>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <Clock size={15} className="text-sky-400 shrink-0 mt-0.5" />
-                <span>{content.businessHours}</span>
-              </div>
-              <div className="pt-2">
-                <a
-                  href={`https://wa.me/${cleanWhatsApp}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold text-xs transition"
-                >
-                  <MessageSquare size={14} />
-                  <span>Chat on WhatsApp</span>
-                </a>
-              </div>
+              <p>{c.brNumberPlaceholder}</p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Bottom bar */}
-        <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} {content.businessName}. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1">
-              <ShieldCheck size={14} className="text-emerald-500" />
-              <span>Full Operational Privacy & Data Protection</span>
-            </span>
-            <Link href="/privacy" className="hover:text-slate-400 transition">
-              Privacy
-            </Link>
-            <Link href="/terms" className="hover:text-slate-400 transition">
-              Terms
-            </Link>
+      {/* Bottom bar */}
+      <div className="border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-600">
+          <p>© {new Date().getFullYear()} {c.businessName}. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-slate-400 transition">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-slate-400 transition">Terms & Conditions</Link>
+            <Link href="/sitemap.xml" className="hover:text-slate-400 transition">Sitemap</Link>
           </div>
         </div>
       </div>

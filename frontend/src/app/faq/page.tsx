@@ -2,210 +2,134 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import {
-  HelpCircle,
-  Search,
-  ChevronDown,
-  Phone,
-  FileText,
-  Building,
-  CheckCircle2,
-} from 'lucide-react';
+import { ChevronDown, Search, ChevronRight } from 'lucide-react';
 import { PublicHeader } from '@/components/public/PublicHeader';
 import { PublicFooter } from '@/components/public/PublicFooter';
 
+const DEFAULT_FAQS = [
+  { question: 'What is included in a monthly vehicle hire contract?', answer: 'Monthly agreements typically include a standard kilometre allowance (e.g. 3,000 km/month), full comprehensive insurance, routine scheduled maintenance, a professional driver, and backup vehicle replacement guarantees.', category: 'Monthly Hire' },
+  { question: 'How do you calculate additional kilometres and overtime charges?', answer: 'Excess kilometres beyond the agreed monthly threshold are billed at the contracted extra-km rate. Driver overtime beyond the standard working window is calculated at agreed hourly overtime rates based on signed daily running charts.', category: 'Billing & Rates' },
+  { question: 'What types of double-cab pickups do you offer?', answer: 'We provide modern 4x4 Toyota Hilux, Mitsubishi L200, and Isuzu D-Max crew-cab pickups ideal for construction supervision, engineering fieldwork, and rugged terrain transport.', category: 'Fleet & Vehicles' },
+  { question: 'Can corporate clients receive consolidated monthly VAT invoices?', answer: 'Yes. Our accounting engine generates consolidated or per-vehicle invoices itemizing base rental, verified running chart kilometres, driver allowances, and tax schedules on agreed credit payment terms.', category: 'Corporate Invoicing' },
+  { question: 'How do I request a formal quotation?', answer: 'Submit your requirements via our online "Request a Quotation" form. Our operations team reviews vehicle availability, calculates customised terms, and delivers an official quotation PDF to your account within 24 hours.', category: 'Quotations' },
+  { question: 'Are your drivers background-checked and licensed?', answer: 'Yes. All chauffeurs are rigorously background-verified, hold valid commercial driving licences, and undergo continuous training in professional driving standards and client service etiquette.', category: 'Drivers' },
+  { question: 'Do you provide vehicles for tourism and group travel?', answer: 'Yes. We offer Toyota KDH passenger vans and other suitable vehicles for tourism groups, cultural tours, airport transfers, and intercity travel with experienced route-familiar drivers.', category: 'Tourism & Travel' },
+  { question: 'What happens if a vehicle breaks down mid-contract?', answer: 'All our monthly contracts include a mandatory replacement vehicle guarantee. In the event of a mechanical issue, a replacement vehicle is dispatched from our contingency fleet to minimise operational disruption.', category: 'Reliability' },
+];
+
 export default function FAQPage() {
-  const [content, setContent] = useState<any>(null);
+  const [faqs, setFaqs] = useState<any[]>(DEFAULT_FAQS);
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [expanded, setExpanded] = useState<number | null>(null);
 
   useEffect(() => {
     fetch('/api/public/content')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.data) {
-          setContent(data.data);
-        }
-      })
+      .then((r) => r.json())
+      .then((d) => { if (d.success && d.data?.faqs?.length) setFaqs(d.data.faqs); })
       .catch(() => {});
   }, []);
 
-  const defaultFaqs = [
-    {
-      category: 'Monthly Hire',
-      question: 'What is included in a standard monthly vehicle hire agreement?',
-      answer:
-        'Standard monthly agreements include the dedicated vehicle, an agreed monthly kilometre threshold (typically 3,000 KM per month), comprehensive commercial insurance, routine 5,000 km maintenance, replacement vehicle guarantees, and a professional driver (unless authorized corporate self-drive).',
-    },
-    {
-      category: 'Billing & Rates',
-      question: 'How are extra kilometres and driver overtime calculated?',
-      answer:
-        'Running charts are maintained daily with starting and ending odometer readings signed by your designated project officer. Any mileage beyond the monthly 3,000 KM package is billed at the agreed contractual rate per extra kilometre. Driver overtime is calculated based on hours exceeding the agreed 8 or 9-hour daily shift.',
-    },
-    {
-      category: 'Fleet & Pickups',
-      question: 'What models of 4x4 double cab pickups are available?',
-      answer:
-        'We operate modern 4x4 Toyota Hilux, Isuzu D-Max, and Mitsubishi L200 crew-cab pickups with high ground clearance, dual A/C, and heavy duty cargo beds suitable for remote civil engineering and corporate site supervision.',
-    },
-    {
-      category: 'Passenger Vans',
-      question: 'What seating capacities are available for passenger vans?',
-      answer:
-        'Our passenger van fleet includes Toyota KDH standard roof (7–9 passengers with extensive luggage boot) and Toyota KDH Commuter high roof (up to 14 passengers with dual cooling lines and high headroom).',
-    },
-    {
-      category: 'Quotations',
-      question: 'How long is an official quotation valid for?',
-      answer:
-        'Standard quotations are typically valid for 14 to 30 days from date of issue, subject to ongoing vehicle asset availability at the time of final confirmation.',
-    },
-    {
-      category: 'Invoicing & VAT',
-      question: 'Can corporate clients receive tax compliant monthly VAT invoices?',
-      answer:
-        'Yes. All corporate clients receive formal itemized VAT invoices reflecting base rental, verified running chart kilometres, driver overtime, and applicable statutory taxes with standard 15 to 30-day corporate credit payment terms.',
-    },
-    {
-      category: 'Customer Portal',
-      question: 'How can I access my quotations, bookings, and invoices online?',
-      answer:
-        'After registering for a customer account, you can log in to your private Customer Portal (/portal) where you can review quotation requests, download formal quotation PDFs, monitor active bookings, and access historic invoices.',
-    },
-    {
-      category: 'Booking & Cancellations',
-      question: 'What is the booking cancellation policy for daily hires?',
-      answer:
-        'Notice of cancellation provided at least 24 hours prior to scheduled vehicle dispatch is accepted without penalty. Cancellations within 12 hours or after vehicle dispatch may incur a nominal mobilization fee.',
-    },
-  ];
+  const categories = ['All', ...Array.from(new Set(faqs.map((f: any) => f.category).filter(Boolean)))];
 
-  const faqs = content?.faqs?.length ? content.faqs : defaultFaqs;
-
-  const categories = ['All', 'Monthly Hire', 'Billing & Rates', 'Fleet & Pickups', 'Passenger Vans', 'Customer Portal'];
-
-  const filteredFaqs = faqs.filter((f: any) => {
-    const matchesSearch =
-      f.question.toLowerCase().includes(search.toLowerCase()) ||
-      f.answer.toLowerCase().includes(search.toLowerCase());
-    const matchesCat =
-      selectedCategory === 'All' ||
-      f.category?.toLowerCase() === selectedCategory.toLowerCase() ||
-      (selectedCategory === 'Fleet & Pickups' && (f.category?.includes('Fleet') || f.category?.includes('Double Cab')));
-    return matchesSearch && matchesCat;
+  const filtered = faqs.filter((f: any) => {
+    const matchCat = activeCategory === 'All' || f.category === activeCategory;
+    const matchSearch = !search || f.question.toLowerCase().includes(search.toLowerCase()) || f.answer.toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchSearch;
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+    <div className="min-h-screen bg-white">
       <PublicHeader />
 
-      {/* Banner */}
-      <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-sky-950 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl space-y-3">
-            <span className="text-xs font-bold text-sky-400 uppercase tracking-wider bg-sky-950 px-3 py-1 rounded-full border border-sky-800">
-              Knowledge Base
-            </span>
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-              Frequently Asked Questions
-            </h1>
-            <p className="text-sm text-slate-300 leading-relaxed">
-              Find answers regarding corporate hire terms, running charts, billing, driver provisions, and quotation procedures.
-            </p>
+      {/* Hero */}
+      <section className="bg-slate-900 text-white py-14 sm:py-16">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <span className="text-xs font-bold text-sky-400 uppercase tracking-wider bg-sky-950 px-3 py-1 rounded-full border border-sky-800">FAQs</span>
+          <h1 className="text-3xl sm:text-4xl font-black text-white mt-4 tracking-tight">Frequently Asked Questions</h1>
+          <p className="text-sm text-slate-300 mt-3">Everything you need to know about vehicle hire conditions, billing, drivers, and contracts.</p>
+
+          {/* Search */}
+          <div className="relative mt-6 max-w-lg mx-auto">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search questions…"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setExpanded(null); }}
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-sky-500 transition"
+            />
           </div>
         </div>
       </section>
 
-      {/* Content */}
-      <section className="py-12 bg-white flex-1">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          {/* Search bar */}
-          <div className="relative">
-            <Search className="absolute left-4 top-3.5 text-slate-400" size={18} />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search topics (e.g. kilometre allowances, double cab, invoices, overtime...)"
-              className="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm shadow-xs"
-            />
-          </div>
+      {/* Category tabs */}
+      <div className="border-b border-slate-200 bg-white sticky top-[68px] z-10">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex gap-2 overflow-x-auto">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => { setActiveCategory(cat); setExpanded(null); }}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition ${
+                activeCategory === cat
+                  ? 'bg-sky-600 text-white'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
 
-          {/* Categories */}
-          <div className="flex flex-wrap items-center gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                  selectedCategory === cat
-                    ? 'bg-sky-600 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          {/* Accordion */}
-          <div className="space-y-3 pt-2">
-            {filteredFaqs.length === 0 ? (
-              <div className="text-center py-12 text-slate-500 text-xs">
-                No questions found matching your search. Try another query or contact our operations desk.
-              </div>
-            ) : (
-              filteredFaqs.map((faq: any, idx: number) => {
-                const isOpen = expandedIndex === idx;
+      {/* FAQ list */}
+      <section className="py-12 sm:py-16">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          {filtered.length === 0 ? (
+            <div className="text-center py-16 text-slate-400">
+              <p className="text-lg font-bold">No questions found</p>
+              <p className="text-sm mt-1">Try a different search term or category</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filtered.map((faq: any, idx: number) => {
+                const open = expanded === idx;
                 return (
-                  <div
-                    key={idx}
-                    className="bg-slate-50 rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden transition"
-                  >
+                  <div key={idx} className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
                     <button
-                      onClick={() => setExpandedIndex(isOpen ? null : idx)}
-                      className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm text-slate-900 hover:text-sky-600 transition cursor-pointer"
+                      onClick={() => setExpanded(open ? null : idx)}
+                      className="w-full p-5 text-left flex items-start justify-between gap-4 hover:text-sky-600 transition cursor-pointer"
                     >
-                      <span>{faq.question}</span>
-                      <ChevronDown
-                        size={18}
-                        className={`text-slate-400 shrink-0 transition-transform ${
-                          isOpen ? 'rotate-180 text-sky-600' : ''
-                        }`}
-                      />
+                      <div className="flex-1">
+                        {faq.category && (
+                          <span className="text-[10px] font-bold text-sky-600 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-full mr-2">{faq.category}</span>
+                        )}
+                        <span className="font-bold text-sm text-slate-800">{faq.question}</span>
+                      </div>
+                      <ChevronDown size={18} className={`text-slate-400 transition-transform shrink-0 mt-0.5 ${open ? 'rotate-180 text-sky-600' : ''}`} />
                     </button>
-                    {isOpen && (
-                      <div className="px-5 pb-5 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 pt-3">
+                    <div className={`overflow-hidden transition-all duration-200 ${open ? 'max-h-96' : 'max-h-0'}`}>
+                      <div className="px-5 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
                         {faq.answer}
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
-              })
-            )}
-          </div>
+              })}
+            </div>
+          )}
 
-          {/* Still have questions */}
-          <div className="p-8 bg-slate-900 text-white rounded-3xl text-center space-y-4">
-            <HelpCircle size={32} className="text-sky-400 mx-auto" />
-            <h3 className="text-lg font-bold">Have a Specific Operational Question?</h3>
-            <p className="text-xs text-slate-300 max-w-md mx-auto">
-              Our operations coordinators can explain agreement clauses, rate structures, and vehicle allocations for your company.
-            </p>
-            <div className="pt-2 flex justify-center gap-4">
-              <Link
-                href="/contact"
-                className="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow-xs transition"
-              >
-                Contact Support Desk
+          <div className="mt-12 text-center bg-slate-50 rounded-2xl border border-slate-200 p-8">
+            <p className="font-bold text-slate-900 text-lg">Still have questions?</p>
+            <p className="text-sm text-slate-600 mt-1">Our operations team is happy to help with any enquiries.</p>
+            <div className="flex flex-wrap gap-3 justify-center mt-5">
+              <Link href="/contact"
+                className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm transition">
+                Contact Us
               </Link>
-              <Link
-                href="/request-quotation"
-                className="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs rounded-xl transition"
-              >
-                Request Quotation
+              <Link href="/request-quotation"
+                className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition flex items-center gap-1.5">
+                Get a Quotation <ChevronRight size={14} />
               </Link>
             </div>
           </div>
