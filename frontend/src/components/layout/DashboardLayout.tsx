@@ -29,6 +29,7 @@ import {
   Search,
   Package,
   Calculator,
+  ExternalLink,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -131,14 +132,27 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           )}
           <span className="font-bold text-lg tracking-tight truncate max-w-[200px]">{companyName}</span>
         </div>
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          aria-label={sidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
-          aria-expanded={sidebarOpen}
-          className="shrink-0 rounded-md p-2 text-slate-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-        >
-          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="flex items-center space-x-2">
+          <Link
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 hover:text-white hover:bg-sky-500/30 text-xs font-semibold border border-sky-400/30 transition"
+            title="Open Public Website"
+          >
+            <Globe size={14} className="text-sky-400" />
+            <span>Website</span>
+            <ExternalLink size={11} className="opacity-75" />
+          </Link>
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label={sidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={sidebarOpen}
+            className="shrink-0 rounded-md p-2 text-slate-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </header>
 
       {sidebarOpen && (
@@ -175,7 +189,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         </div>
 
         {/* Navigation list */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+        <div className="hide-scrollbar flex-1 overflow-y-auto px-3 py-4 space-y-6">
           <Link
             href="/dashboard"
             onClick={() => setSidebarOpen(false)}
@@ -187,6 +201,24 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           >
             <LayoutDashboard size={18} />
             <span>Dashboard</span>
+          </Link>
+
+          {/* Direct Link to Public Website */}
+          <Link
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setSidebarOpen(false)}
+            className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-gradient-to-r from-sky-950/60 to-slate-850 border border-sky-500/30 text-sky-300 hover:text-white hover:border-sky-400 hover:from-sky-900/60 transition group shadow-sm"
+          >
+            <div className="flex items-center space-x-2.5">
+              <Globe size={17} className="text-sky-400 group-hover:rotate-12 transition-transform" />
+              <div className="text-left">
+                <span className="block text-xs font-bold leading-tight">View Public Website</span>
+                <span className="block text-[10px] text-sky-400/80 leading-tight">Open in new tab</span>
+              </div>
+            </div>
+            <ExternalLink size={13} className="text-sky-400/70 group-hover:text-white transition-colors" />
           </Link>
 
           {categories.map((cat) => (
@@ -259,7 +291,18 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           </div>
 
           <div className="flex items-center space-x-5">
-            
+            {/* View Live Website Button */}
+            <Link
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white text-xs font-bold shadow-md shadow-sky-600/20 hover:shadow-sky-600/35 transition-all hover:scale-[1.02]"
+              title="Open the customer-facing business website in a new tab"
+            >
+              <Globe size={15} />
+              <span>View Public Website</span>
+              <ExternalLink size={12} className="opacity-80" />
+            </Link>
 
             <Link
               href="/documents"
