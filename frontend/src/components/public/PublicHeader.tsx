@@ -209,14 +209,16 @@ export const PublicHeader: React.FC = () => {
         <div className="flex items-center justify-between h-16 lg:h-[68px]">
 
           {/* Brand */}
-          <Link href="/" className="flex items-center gap-2.5 group shrink-0" onClick={() => setMobileOpen(false)}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-900 via-sky-900 to-sky-600 flex items-center justify-center shadow-md shadow-sky-600/20 group-hover:scale-105 transition overflow-hidden p-1.5">
-              {branding.logoUrl ? (
-                <img src={branding.logoUrl} alt={branding.businessName} className="h-full w-full object-contain" />
-              ) : (
-                <Truck className="text-white" size={22} />
-              )}
-            </div>
+          <Link href="/" className="flex items-center gap-3 group shrink-0" onClick={() => setMobileOpen(false)}>
+            {branding.logoUrl ? (
+              <div className="h-10 sm:h-11 flex items-center justify-center transition">
+                <img src={branding.logoUrl} alt={branding.businessName} className="h-full w-auto max-w-[140px] sm:max-w-[180px] object-contain" />
+              </div>
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center text-white shadow-sm">
+                <Truck size={22} />
+              </div>
+            )}
             <div className="hidden sm:block">
               <span className="block font-bold text-slate-900 text-[15px] leading-tight tracking-tight">
                 {branding.businessName}

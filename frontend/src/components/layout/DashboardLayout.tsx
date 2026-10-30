@@ -123,8 +123,8 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
       <header className="md:hidden bg-slate-900 text-white flex items-center justify-between gap-3 px-4 py-3 shadow-md sticky top-0 z-50">
         <div className="flex items-center space-x-2">
           {companyLogo ? (
-            <div className="h-8 w-8 rounded-lg bg-white p-0.5 flex items-center justify-center overflow-hidden border border-slate-700 shadow-sm shrink-0">
-              <img src={companyLogo} alt="Logo" className="h-full w-full object-contain" />
+            <div className="h-8 flex items-center justify-center shrink-0">
+              <img src={companyLogo} alt="Logo" className="h-full w-auto max-w-[120px] object-contain" />
             </div>
           ) : (
             <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-sm shrink-0">
@@ -174,8 +174,8 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         <div className="p-5 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-3 truncate">
             {companyLogo ? (
-              <div className="h-11 w-11 shrink-0 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden border border-slate-700 shadow-lg shadow-blue-500/10">
-                <img src={companyLogo} alt="Company Logo" className="h-full w-full object-contain" />
+              <div className="h-10 flex items-center justify-center shrink-0">
+                <img src={companyLogo} alt="Company Logo" className="h-full w-auto max-w-[140px] object-contain" />
               </div>
             ) : (
               <div className="h-10 w-10 shrink-0 rounded-xl bg-blue-600 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-blue-500/30">

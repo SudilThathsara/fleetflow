@@ -141,13 +141,15 @@ export const PublicFooter: React.FC = () => {
           {/* Column 1 — Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2.5 group mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 via-sky-900 to-sky-600 flex items-center justify-center overflow-hidden p-1.5 shrink-0">
-                {c.logoUrl ? (
-                  <img src={c.logoUrl} alt={c.businessName} className="h-full w-full object-contain" />
-                ) : (
-                  <Truck size={20} className="text-white" />
-                )}
-              </div>
+              {c.logoUrl ? (
+                <div className="h-10 flex items-center justify-center shrink-0">
+                  <img src={c.logoUrl} alt={c.businessName} className="h-full w-auto max-w-[140px] object-contain" />
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center shrink-0 text-white shadow-sm">
+                  <Truck size={20} />
+                </div>
+              )}
               <div>
                 <span className="block font-bold text-white text-sm leading-tight">{c.businessName}</span>
                 <span className="block text-[10px] text-sky-500 leading-tight mt-0.5">{c.tagline.slice(0, 40)}{c.tagline.length > 40 ? '…' : ''}</span>

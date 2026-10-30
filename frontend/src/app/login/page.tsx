@@ -105,13 +105,15 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
         {/* Top Header */}
         <div className="bg-slate-950 p-8 text-center text-white relative border-b border-slate-800">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-sky-600 flex items-center justify-center mb-4 shadow-lg shadow-sky-500/30 overflow-hidden p-2">
-            {branding.logoUrl ? (
-              <img src={branding.logoUrl} alt={branding.companyName} className="h-full w-full object-contain" />
-            ) : (
+          {branding.logoUrl ? (
+            <div className="mx-auto h-14 flex items-center justify-center mb-4">
+              <img src={branding.logoUrl} alt={branding.companyName} className="h-full w-auto max-w-[200px] object-contain" />
+            </div>
+          ) : (
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-sky-600 flex items-center justify-center mb-4 shadow-lg shadow-sky-500/30">
               <Truck size={32} className="text-white" />
-            )}
-          </div>
+            </div>
+          )}
           <h1 className="text-2xl font-bold tracking-tight">{branding.companyName}</h1>
           <p className="text-xs text-sky-400 mt-1 uppercase tracking-wider font-semibold">
             {branding.tagline}

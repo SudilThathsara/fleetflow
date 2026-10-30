@@ -131,13 +131,15 @@ export const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children
       <aside className="hidden lg:flex lg:flex-col w-64 bg-slate-950 text-slate-300 border-r border-slate-800 shrink-0 select-none">
         {/* Brand */}
         <div className="p-6 border-b border-slate-800 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center text-white shadow-md shadow-sky-500/10 overflow-hidden p-1 shrink-0">
-            {branding.logoUrl ? (
-              <img src={branding.logoUrl} alt={branding.businessName} className="h-full w-full object-contain" />
-            ) : (
+          {branding.logoUrl ? (
+            <div className="h-10 flex items-center justify-center shrink-0">
+              <img src={branding.logoUrl} alt={branding.businessName} className="h-full w-auto max-w-[140px] object-contain" />
+            </div>
+          ) : (
+            <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shrink-0">
               <Truck size={22} className="text-sky-400" />
-            )}
-          </div>
+            </div>
+          )}
           <div className="overflow-hidden truncate">
             <h2 className="font-bold text-white text-base leading-tight">Customer Portal</h2>
             <p className="text-xs text-sky-400 font-medium truncate">{branding.businessName}</p>

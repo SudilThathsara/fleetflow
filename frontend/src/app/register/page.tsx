@@ -1,10 +1,44 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Truck, Mail, Lock, Phone, User, Building, ArrowRight, AlertCircle, CheckCircle2, Eye, EyeOff, ShieldCheck, Home } from 'lucide-react';
 
 export default function RegisterPage() {
+  const [branding, setBranding] = useState({
+    companyName: 'Lanka Premier Transport',
+    tagline: 'Track Vehicle Hires, Quotations & Invoices Online',
+    logoUrl: '',
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('fleetflow_settings');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setBranding((b) => ({
+            companyName: parsed.companyName || b.companyName,
+            tagline: parsed.tagline || b.tagline,
+            logoUrl: parsed.logoUrl || '',
+          }));
+        } catch {}
+      }
+    }
+
+    fetch('/api/settings')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setBranding({
+            companyName: data.data.companyName || 'Lanka Premier Transport',
+            tagline: data.data.tagline || 'Track Vehicle Hires, Quotations & Invoices Online',
+            logoUrl: data.data.logoUrl || '',
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -94,12 +128,18 @@ export default function RegisterPage() {
       <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
         {/* Header */}
         <div className="bg-slate-950 p-8 text-center text-white border-b border-slate-800">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-sky-600 flex items-center justify-center mb-3 shadow-lg shadow-sky-500/30">
-            <Truck size={28} className="text-white" />
-          </div>
+          {branding.logoUrl ? (
+            <div className="mx-auto h-14 flex items-center justify-center mb-4">
+              <img src={branding.logoUrl} alt={branding.companyName} className="h-full w-auto max-w-[200px] object-contain" />
+            </div>
+          ) : (
+            <div className="mx-auto w-14 h-14 rounded-2xl bg-sky-600 flex items-center justify-center mb-3 shadow-lg shadow-sky-500/30">
+              <Truck size={28} className="text-white" />
+            </div>
+          )}
           <h1 className="text-2xl font-bold tracking-tight">Create Customer Account</h1>
           <p className="text-xs text-sky-400 mt-1 uppercase tracking-wider font-semibold">
-            Track Vehicle Hires, Quotations & Invoices Online
+            {branding.tagline}
           </p>
         </div>
 
