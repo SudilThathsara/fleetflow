@@ -40,10 +40,39 @@ export const PublicFooter: React.FC = () => {
   const [c, setC] = useState<SiteContent>(DEF);
 
   useEffect(() => {
+    // Check localStorage cache first
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('fleetflow_settings');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setC((prev) => ({
+            ...prev,
+            businessName: parsed.companyName || prev.businessName,
+            tagline: parsed.tagline || prev.tagline,
+            logoUrl: parsed.logoUrl !== undefined ? parsed.logoUrl : prev.logoUrl,
+          }));
+        } catch {}
+      }
+    }
+
     fetch('/api/public/content')
       .then((r) => r.json())
       .then((d) => { if (d.success && d.data) setC({ ...DEF, ...d.data }); })
       .catch(() => {});
+
+    const handleSettingsUpdate = (e: any) => {
+      if (e.detail) {
+        setC((prev) => ({
+          ...prev,
+          businessName: e.detail.companyName || prev.businessName,
+          tagline: e.detail.tagline || prev.tagline,
+          logoUrl: e.detail.logoUrl !== undefined ? e.detail.logoUrl : prev.logoUrl,
+        }));
+      }
+    };
+    window.addEventListener('fleetflow:settings-updated', handleSettingsUpdate);
+    return () => window.removeEventListener('fleetflow:settings-updated', handleSettingsUpdate);
   }, []);
 
   const cleanWA = c.whatsappNumber.replace(/[^0-9]/g, '');

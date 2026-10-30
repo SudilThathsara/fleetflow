@@ -50,6 +50,18 @@ export default function LoginPage() {
         }
       })
       .catch(() => {});
+
+    const handleSettingsUpdate = (e: any) => {
+      if (e.detail) {
+        setBranding((b) => ({
+          companyName: e.detail.companyName || b.companyName,
+          tagline: e.detail.tagline || b.tagline,
+          logoUrl: e.detail.logoUrl !== undefined ? e.detail.logoUrl : b.logoUrl,
+        }));
+      }
+    };
+    window.addEventListener('fleetflow:settings-updated', handleSettingsUpdate);
+    return () => window.removeEventListener('fleetflow:settings-updated', handleSettingsUpdate);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -65,6 +65,22 @@ export const PublicHeader: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Check localStorage cache first for fast display
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('fleetflow_settings');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setBranding((prev) => ({
+            ...prev,
+            businessName: parsed.companyName || prev.businessName,
+            tagline: parsed.tagline || prev.tagline,
+            logoUrl: parsed.logoUrl !== undefined ? parsed.logoUrl : prev.logoUrl,
+          }));
+        } catch {}
+      }
+    }
+
     fetch('/api/public/content')
       .then((r) => r.json())
       .then((d) => {
@@ -81,6 +97,20 @@ export const PublicHeader: React.FC = () => {
         }
       })
       .catch(() => {});
+
+    // Listen to real-time updates when admin saves new logo/branding in settings
+    const handleSettingsUpdate = (e: any) => {
+      if (e.detail) {
+        setBranding((prev) => ({
+          ...prev,
+          businessName: e.detail.companyName || prev.businessName,
+          tagline: e.detail.tagline || prev.tagline,
+          logoUrl: e.detail.logoUrl !== undefined ? e.detail.logoUrl : prev.logoUrl,
+        }));
+      }
+    };
+    window.addEventListener('fleetflow:settings-updated', handleSettingsUpdate);
+    return () => window.removeEventListener('fleetflow:settings-updated', handleSettingsUpdate);
   }, []);
 
   // Close dropdown on outside click

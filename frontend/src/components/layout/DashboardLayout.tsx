@@ -74,7 +74,8 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const cached = localStorage.getItem('fleetflow_settings');
-      if (cached) {
+      if (cached) 
+        {
         try {
           const parsed = JSON.parse(cached);
           if (parsed.companyName) setCompanyName(parsed.companyName);

@@ -37,6 +37,51 @@ export const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children
   const { user, logout, loading } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [branding, setBranding] = useState({
+    businessName: 'Lanka Premier Transport',
+    logoUrl: '',
+  });
+
+  useEffect(() => {
+    // Check cached settings
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('fleetflow_settings');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed.companyName || parsed.logoUrl) {
+            setBranding({
+              businessName: parsed.companyName || 'Lanka Premier Transport',
+              logoUrl: parsed.logoUrl || '',
+            });
+          }
+        } catch {}
+      }
+    }
+
+    fetch('/api/public/content')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setBranding({
+            businessName: data.data.businessName || 'Lanka Premier Transport',
+            logoUrl: data.data.logoUrl || '',
+          });
+        }
+      })
+      .catch(() => {});
+
+    const handleSettingsUpdate = (e: any) => {
+      if (e.detail) {
+        setBranding({
+          businessName: e.detail.companyName || 'Lanka Premier Transport',
+          logoUrl: e.detail.logoUrl || '',
+        });
+      }
+    };
+    window.addEventListener('fleetflow:settings-updated', handleSettingsUpdate);
+    return () => window.removeEventListener('fleetflow:settings-updated', handleSettingsUpdate);
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -86,12 +131,16 @@ export const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children
       <aside className="hidden lg:flex lg:flex-col w-64 bg-slate-950 text-slate-300 border-r border-slate-800 shrink-0 select-none">
         {/* Brand */}
         <div className="p-6 border-b border-slate-800 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
-            <Truck size={22} />
+          <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center text-white shadow-md shadow-sky-500/10 overflow-hidden p-1 shrink-0">
+            {branding.logoUrl ? (
+              <img src={branding.logoUrl} alt={branding.businessName} className="h-full w-full object-contain" />
+            ) : (
+              <Truck size={22} className="text-sky-400" />
+            )}
           </div>
-          <div>
+          <div className="overflow-hidden truncate">
             <h2 className="font-bold text-white text-base leading-tight">Customer Portal</h2>
-            <p className="text-xs text-sky-400 font-medium">Lanka Premier Transport</p>
+            <p className="text-xs text-sky-400 font-medium truncate">{branding.businessName}</p>
           </div>
         </div>
 

@@ -20,7 +20,11 @@ export async function GET() {
       if (settings.phone && !content.phone) content.phone = settings.phone;
       if (settings.email && !content.publicEmail) content.publicEmail = settings.email;
       if (settings.address && !content.address) content.address = settings.address;
-      if (settings.logoUrl && !content.logoUrl) content.logoUrl = settings.logoUrl;
+      // Always sync logoUrl from CompanySettings if CompanySettings has a logo,
+      // ensuring the official company logo is used uniformly across the public site.
+      if (settings.logoUrl) {
+        content.logoUrl = settings.logoUrl;
+      }
     }
 
     return NextResponse.json({ success: true, data: content });

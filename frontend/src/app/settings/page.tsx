@@ -149,6 +149,7 @@ export default function SettingsPage() {
       const result = reader.result as string;
       setLogoPreview(result);
       setSettings((p) => ({ ...p, logoUrl: result }));
+      setWc((p) => ({ ...p, logoUrl: result }));
     };
     reader.readAsDataURL(file);
   };
@@ -157,9 +158,16 @@ export default function SettingsPage() {
     e.preventDefault();
     setSaving(true); setSaveSuccess(false); setSaveError('');
     try {
+      // Sync logoUrl and branding to WebsiteContent so public site always receives the updated logo
+      const websitePayload = {
+        ...wc,
+        logoUrl: settings.logoUrl || wc.logoUrl,
+        businessName: wc.businessName || settings.companyName,
+      };
+
       const [r1, r2] = await Promise.all([
         fetch('/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) }),
-        fetch('/api/public/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(wc) }),
+        fetch('/api/public/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(websitePayload) }),
       ]);
       const d1 = await r1.json();
       if (d1.success) {
@@ -294,7 +302,7 @@ export default function SettingsPage() {
                       )}
                     </div>
                     {logoPreview && (
-                      <button type="button" onClick={() => { setLogoPreview(''); setSettings((p) => ({ ...p, logoUrl: '' })); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                      <button type="button" onClick={() => { setLogoPreview(''); setSettings((p) => ({ ...p, logoUrl: '' })); setWc((p) => ({ ...p, logoUrl: '' })); if (fileInputRef.current) fileInputRef.current.value = ''; }}
                         className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow-sm">
                         <X size={12} />
                       </button>
@@ -307,7 +315,7 @@ export default function SettingsPage() {
                       <Upload size={16} className="text-blue-500" /> Upload Logo (PNG/SVG/JPG, max 2MB)
                     </button>
                     <p className="text-xs text-slate-500">Or paste an image URL:</p>
-                    <Input placeholder="https://your-cdn.com/logo.png" value={settings.logoUrl} onChange={(e) => { setSettings((p) => ({ ...p, logoUrl: e.target.value })); setLogoPreview(e.target.value); }} />
+                    <Input placeholder="https://your-cdn.com/logo.png" value={settings.logoUrl} onChange={(e) => { const val = e.target.value; setSettings((p) => ({ ...p, logoUrl: val })); setWc((p) => ({ ...p, logoUrl: val })); setLogoPreview(val); }} />
                   </div>
                 </div>
               </SectionCard>
