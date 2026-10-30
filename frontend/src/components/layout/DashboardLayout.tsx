@@ -124,7 +124,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         <div className="flex items-center space-x-2">
           {companyLogo ? (
             <div className="h-8 flex items-center justify-center shrink-0">
-              <img src={companyLogo} alt="Logo" className="h-full w-auto max-w-[120px] object-contain" />
+              <img src={companyLogo} alt="Logo" className="h-full w-auto max-w-[120px] object-contain rounded-md" />
             </div>
           ) : (
             <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-sm shrink-0">
@@ -175,7 +175,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           <div className="flex items-center space-x-3 truncate">
             {companyLogo ? (
               <div className="h-10 flex items-center justify-center shrink-0">
-                <img src={companyLogo} alt="Company Logo" className="h-full w-auto max-w-[140px] object-contain" />
+                <img src={companyLogo} alt="Company Logo" className="h-full w-auto max-w-[140px] object-contain rounded-lg" />
               </div>
             ) : (
               <div className="h-10 w-10 shrink-0 rounded-xl bg-blue-600 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-blue-500/30">

@@ -293,7 +293,7 @@ export default function SettingsPage() {
                   <div className="relative group shrink-0">
                     <div className="h-28 w-28 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center overflow-hidden p-2">
                       {logoPreview ? (
-                        <img src={logoPreview} alt="Logo" className="h-full w-full object-contain" />
+                        <img src={logoPreview} alt="Logo" className="h-full w-full object-contain rounded-xl" />
                       ) : (
                         <div className="text-center text-slate-400">
                           <ImageIcon size={28} className="mx-auto mb-1" />

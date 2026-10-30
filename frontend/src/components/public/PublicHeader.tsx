@@ -212,7 +212,7 @@ export const PublicHeader: React.FC = () => {
           <Link href="/" className="flex items-center gap-3 group shrink-0" onClick={() => setMobileOpen(false)}>
             {branding.logoUrl ? (
               <div className="h-10 sm:h-11 flex items-center justify-center transition">
-                <img src={branding.logoUrl} alt={branding.businessName} className="h-full w-auto max-w-[140px] sm:max-w-[180px] object-contain" />
+                <img src={branding.logoUrl} alt={branding.businessName} className="h-full w-auto max-w-[140px] sm:max-w-[180px] object-contain rounded-lg" />
               </div>
             ) : (
               <div className="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center text-white shadow-sm">

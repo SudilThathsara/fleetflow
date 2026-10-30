@@ -107,7 +107,7 @@ export default function LoginPage() {
         <div className="bg-slate-950 p-8 text-center text-white relative border-b border-slate-800">
           {branding.logoUrl ? (
             <div className="mx-auto h-14 flex items-center justify-center mb-4">
-              <img src={branding.logoUrl} alt={branding.companyName} className="h-full w-auto max-w-[200px] object-contain" />
+              <img src={branding.logoUrl} alt={branding.companyName} className="h-full w-auto max-w-[200px] object-contain rounded-xl" />
             </div>
           ) : (
             <div className="mx-auto w-16 h-16 rounded-2xl bg-sky-600 flex items-center justify-center mb-4 shadow-lg shadow-sky-500/30">

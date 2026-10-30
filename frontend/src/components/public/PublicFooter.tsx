@@ -143,7 +143,7 @@ export const PublicFooter: React.FC = () => {
             <Link href="/" className="flex items-center gap-2.5 group mb-4">
               {c.logoUrl ? (
                 <div className="h-10 flex items-center justify-center shrink-0">
-                  <img src={c.logoUrl} alt={c.businessName} className="h-full w-auto max-w-[140px] object-contain" />
+                  <img src={c.logoUrl} alt={c.businessName} className="h-full w-auto max-w-[140px] object-contain rounded-lg" />
                 </div>
               ) : (
                 <div className="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center shrink-0 text-white shadow-sm">
