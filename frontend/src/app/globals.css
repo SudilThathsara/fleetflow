@@ -10,13 +10,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --breakpoint-xs: 400px;
 }
 
 body {
@@ -47,38 +41,38 @@ textarea {
   max-width: 100%;
 }
 
+/* Smooth mobile scrolling for overflow containers */
 .overflow-x-auto {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
 }
 
+/* Hide scrollbar utility */
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
+/* Tables always scroll on mobile */
 .overflow-x-auto table {
-  min-width: 640px;
+  min-width: 600px;
 }
 
-@media (max-width: 639px) {
-  .overflow-x-auto table {
-    min-width: 560px;
-  }
-}
-
-@media (max-width: 479px) {
-  .grid-cols-2 {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
+/* Mobile: prevent iOS auto-zoom on inputs */
+@media (max-width: 768px) {
   input,
   select,
   textarea {
-    font-size: 16px;
+    font-size: 16px; /* Prevent iOS auto-zoom */
+  }
+}
+
+/* Small phones */
+@media (max-width: 390px) {
+  .overflow-x-auto table {
+    min-width: 480px;
   }
 }

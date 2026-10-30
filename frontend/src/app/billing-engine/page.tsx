@@ -313,7 +313,7 @@ export default function BillingEnginePage() {
                     <p>• Generating an official invoice locks these historical rate snapshots permanently.</p>
                   </div>
 
-                  <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm min-w-[280px] space-y-2">
+                  <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm w-full space-y-2">
                     <div className="flex justify-between text-xs text-slate-600">
                       <span>Subtotal:</span>
                       <strong className="text-slate-900">LKR {Number(calculationResult.subtotal).toLocaleString()}</strong>

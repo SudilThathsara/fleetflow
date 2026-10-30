@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -127,7 +127,7 @@ export default function RegisterPage() {
 
       <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
         {/* Header */}
-        <div className="bg-slate-950 p-8 text-center text-white border-b border-slate-800">
+        <div className="bg-slate-950 p-5 sm:p-8 text-center text-white border-b border-slate-800">
           {branding.logoUrl ? (
             <div className="mx-auto h-14 flex items-center justify-center mb-4">
               <img src={branding.logoUrl} alt={branding.companyName} className="h-full w-auto max-w-[200px] object-contain rounded-xl" />
@@ -143,7 +143,7 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <div className="p-8">
+        <div className="p-5 sm:p-8">
           {successMessage ? (
             <div className="text-center py-6 space-y-4">
               <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
@@ -359,7 +359,7 @@ export default function RegisterPage() {
           )}
         </div>
 
-        <div className="bg-slate-50 px-8 py-3.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+        <div className="bg-slate-50 px-4 sm:px-8 py-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
           <div className="flex items-center gap-1.5">
             <ShieldCheck size={14} className="text-emerald-500" />
             <span>Customer Data Strictly Protected</span>

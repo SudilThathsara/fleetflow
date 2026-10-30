@@ -369,7 +369,7 @@ export default function ContractsAndRatesPage() {
 
                       <div className="flex justify-between py-1">
                         <span className="text-slate-500">Fuel Arrangement:</span>
-                        <strong className="text-slate-700 text-right max-w-[180px]">
+                        <strong className="text-slate-700 text-right max-w-xs sm:max-w-[180px] break-words">
                           {rc.fuelIncluded ? '✓ Included in Basic Hire' : rc.fuelReimbursementMethod || 'Customer Provides / Reimbursed'}
                         </strong>
                       </div>

@@ -68,7 +68,7 @@ function ResetPasswordContent() {
         </p>
       </div>
 
-      <div className="p-8">
+      <div className="p-5 sm:p-8">
         {success ? (
           <div className="text-center py-4 space-y-4">
             <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">

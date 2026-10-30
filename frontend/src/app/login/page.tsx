@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -104,7 +104,7 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
         {/* Top Header */}
-        <div className="bg-slate-950 p-8 text-center text-white relative border-b border-slate-800">
+        <div className="bg-slate-950 p-5 sm:p-8 text-center text-white relative border-b border-slate-800">
           {branding.logoUrl ? (
             <div className="mx-auto h-14 flex items-center justify-center mb-4">
               <img src={branding.logoUrl} alt={branding.companyName} className="h-full w-auto max-w-[200px] object-contain rounded-xl" />
@@ -121,7 +121,7 @@ export default function LoginPage() {
         </div>
 
         {/* Form Container */}
-        <div className="p-8">
+        <div className="p-5 sm:p-8">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-slate-900">Sign in to your account</h2>
             <p className="text-sm text-slate-500 mt-0.5">
@@ -243,7 +243,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <div className="bg-slate-50 px-8 py-3.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+        <div className="bg-slate-50 px-4 sm:px-8 py-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
           <div className="flex items-center gap-1.5">
             <ShieldCheck size={14} className="text-emerald-500" />
             <span>256-Bit Encrypted Session</span>

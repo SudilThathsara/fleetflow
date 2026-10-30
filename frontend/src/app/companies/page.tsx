@@ -614,7 +614,7 @@ export default function CompaniesAndProjectsPage() {
         {/* Modal: Add/Edit Company */}
         {isCompanyModalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
                 <h3 className="font-bold text-slate-800 text-lg">
                   {editingCompany ? 'Edit Customer Company' : 'Add New Customer Company'}
@@ -745,7 +745,7 @@ export default function CompaniesAndProjectsPage() {
         {/* Modal: Add/Edit Project */}
         {isProjectModalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
                 <h3 className="font-bold text-slate-800 text-lg">
                   {editingProject ? 'Edit Project' : 'Create New Customer Project'}

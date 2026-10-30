@@ -261,49 +261,59 @@ export const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
             <div className="h-6 w-px bg-slate-200" />
 
-            <div className="flex items-center gap-2 text-xs">
-              <span className="hidden md:inline text-slate-600 font-medium">{user?.name}</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs">
+              <span className="hidden md:inline text-slate-600 font-medium truncate max-w-[120px]">{user?.name}</span>
               <button
                 onClick={() => logout()}
-                className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-slate-100 rounded-lg transition"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 border border-rose-200 transition font-semibold cursor-pointer"
                 title="Sign out"
               >
-                <LogOut size={16} />
+                <LogOut size={14} />
+                <span className="hidden xs:inline">Sign Out</span>
               </button>
             </div>
           </div>
         </header>
 
-        {/* Mobile Navigation Drawer */}
+        {/* Mobile Navigation Drawer — fixed overlay, doesn't push content */}
         {mobileOpen && (
-          <div className="lg:hidden bg-slate-950 text-slate-300 border-b border-slate-800 p-4 space-y-1 z-40">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm ${
-                    isActive ? 'bg-sky-600 text-white font-bold' : 'text-slate-300 hover:bg-slate-900'
-                  }`}
-                >
-                  <Icon size={16} />
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
-            <div className="pt-3 border-t border-slate-800 flex justify-between items-center text-xs">
-              <Link href="/" className="text-slate-400">
-                Public Website
-              </Link>
-              <button onClick={() => logout()} className="text-red-400 font-semibold">
-                Sign Out
-              </button>
-            </div>
-          </div>
+          <button
+            aria-label="Close menu overlay"
+            onClick={() => setMobileOpen(false)}
+            className="lg:hidden fixed inset-0 bg-slate-950/60 z-30"
+          />
         )}
+        <div
+          className={`lg:hidden fixed top-16 left-0 right-0 bg-slate-950 text-slate-300 border-b border-slate-800 p-4 space-y-1 z-40 transition-all duration-300 overflow-y-auto max-h-[calc(100vh-4rem)] ${
+            mobileOpen ? 'translate-y-0 opacity-100 pointer-events-auto' : '-translate-y-4 opacity-0 pointer-events-none'
+          }`}
+        >
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm ${
+                  isActive ? 'bg-sky-600 text-white font-bold' : 'text-slate-300 hover:bg-slate-900'
+                }`}
+              >
+                <Icon size={16} />
+                <span>{item.name}</span>
+              </Link>
+            );
+          })}
+          <div className="pt-3 border-t border-slate-800 flex justify-between items-center text-xs">
+            <Link href="/" className="text-slate-400">
+              Public Website
+            </Link>
+            <button onClick={() => logout()} className="text-red-400 font-semibold">
+              Sign Out
+            </button>
+          </div>
+        </div>
 
         {/* Page Content Body */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">{children}</main>

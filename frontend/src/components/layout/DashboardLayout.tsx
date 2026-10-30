@@ -120,38 +120,45 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   return (
     <div className="min-h-screen min-w-0 bg-slate-50 flex flex-col md:flex-row text-slate-900 font-sans">
       {/* Mobile Top bar */}
-      <header className="md:hidden bg-slate-900 text-white flex items-center justify-between gap-3 px-4 py-3 shadow-md sticky top-0 z-50">
-        <div className="flex items-center space-x-2">
+      <header className="md:hidden bg-slate-900 text-white flex items-center justify-between gap-2 px-3 sm:px-4 py-2.5 shadow-md sticky top-0 z-50">
+        <div className="flex items-center space-x-2 min-w-0">
           {companyLogo ? (
             <div className="h-8 flex items-center justify-center shrink-0">
-              <img src={companyLogo} alt="Logo" className="h-full w-auto max-w-[120px] object-contain rounded-md" />
+              <img src={companyLogo} alt="Logo" className="h-full w-auto max-w-[100px] object-contain rounded-md" />
             </div>
           ) : (
             <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-sm shrink-0">
               {companyName ? companyName.charAt(0).toUpperCase() : 'FL'}
             </div>
           )}
-          <span className="font-bold text-lg tracking-tight truncate max-w-[200px]">{companyName}</span>
+          <span className="font-bold text-base sm:text-lg tracking-tight truncate max-w-[130px] sm:max-w-[200px]">{companyName}</span>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
           <Link
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 hover:text-white hover:bg-sky-500/30 text-xs font-semibold border border-sky-400/30 transition"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 hover:text-white hover:bg-sky-500/30 text-xs font-semibold border border-sky-400/30 transition"
             title="Open Public Website"
           >
-            <Globe size={14} className="text-sky-400" />
-            <span>Website</span>
-            <ExternalLink size={11} className="opacity-75" />
+            <Globe size={13} className="text-sky-400" />
+            <span className="hidden xs:inline">Website</span>
           </Link>
+          <button
+            onClick={logout}
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-rose-500/20 text-rose-300 hover:text-white hover:bg-rose-500/30 text-xs font-semibold border border-rose-400/30 transition cursor-pointer"
+            title="Sign Out"
+          >
+            <LogOut size={13} />
+            <span className="hidden xs:inline">Logout</span>
+          </button>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-label={sidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={sidebarOpen}
-            className="shrink-0 rounded-md p-2 text-slate-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="shrink-0 rounded-md p-1.5 text-slate-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
           >
-            {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+            {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </header>
@@ -166,27 +173,34 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen w-[min(18rem,calc(100vw-2rem))] bg-slate-900 text-slate-200 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+        className={`fixed md:sticky top-0 left-0 h-[100dvh] md:h-screen w-[min(18rem,calc(100vw-2rem))] bg-slate-900 text-slate-200 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
         {/* Brand header */}
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-3 truncate">
             {companyLogo ? (
-              <div className="h-10 flex items-center justify-center shrink-0">
-                <img src={companyLogo} alt="Company Logo" className="h-full w-auto max-w-[140px] object-contain rounded-lg" />
+              <div className="h-9 flex items-center justify-center shrink-0">
+                <img src={companyLogo} alt="Company Logo" className="h-full w-auto max-w-[130px] object-contain rounded-lg" />
               </div>
             ) : (
-              <div className="h-10 w-10 shrink-0 rounded-xl bg-blue-600 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-blue-500/30">
+              <div className="h-9 w-9 shrink-0 rounded-xl bg-blue-600 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-blue-500/30">
                 {companyName ? companyName.charAt(0).toUpperCase() : 'F'}
               </div>
             )}
             <div className="truncate">
-              <h1 className="font-extrabold text-base text-white tracking-wide truncate">{companyName}</h1>
-              <p className="text-xs text-blue-400 font-medium tracking-tight">Transport ERP Suite</p>
+              <h1 className="font-extrabold text-sm sm:text-base text-white tracking-wide truncate">{companyName}</h1>
+              <p className="text-[11px] text-blue-400 font-medium tracking-tight">Transport ERP Suite</p>
             </div>
           </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden text-slate-400 hover:text-white p-1 rounded-lg"
+            aria-label="Close sidebar"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         {/* Navigation list */}
@@ -236,10 +250,10 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         </div>
 
         {/* User profile footer */}
-        <div className="p-3 border-t border-slate-800 bg-slate-950/60">
+        <div className="p-3 border-t border-slate-800 bg-slate-950/80 sticky bottom-0 z-10 shrink-0">
           <div className="flex items-center justify-between px-2 py-1">
             <div className="flex items-center space-x-3 truncate">
-              <div className="h-9 w-9 rounded-full bg-slate-700 flex items-center justify-center font-bold text-white text-sm">
+              <div className="h-9 w-9 rounded-full bg-slate-700 flex items-center justify-center font-bold text-white text-sm shrink-0">
                 {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
               </div>
               <div className="truncate">
@@ -250,9 +264,10 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
             <button
               onClick={logout}
               title="Logout"
-              className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg transition-colors cursor-pointer"
             >
-              <LogOut size={18} />
+              <LogOut size={15} />
+              <span className="font-semibold">Logout</span>
             </button>
           </div>
         </div>

@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   Truck, Phone, MessageSquare, Menu, X, User, FileText,
   ChevronDown, Shield, Clock, Building2, Users, Calendar,
-  Car, Globe,
+  Car, Globe, LogOut,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -50,7 +50,7 @@ interface NavItem {
 
 export const PublicHeader: React.FC = () => {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
@@ -306,15 +306,24 @@ export const PublicHeader: React.FC = () => {
           {/* Right CTA (desktop + tablet) */}
           <div className="hidden sm:flex items-center gap-2">
             {user ? (
-              <Link
-                href={user.role === 'customer' ? '/portal' : '/dashboard'}
-                className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[13px] font-semibold flex items-center gap-1.5 transition"
-              >
-                <User size={15} className="text-sky-600" />
-                <span className="hidden md:inline">
-                  {user.role === 'customer' ? 'My Portal' : 'Dashboard'}
-                </span>
-              </Link>
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href={user.role === 'customer' ? '/portal' : '/dashboard'}
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[13px] font-semibold flex items-center gap-1.5 transition"
+                >
+                  <User size={15} className="text-sky-600" />
+                  <span className="hidden md:inline">
+                    {user.role === 'customer' ? 'My Portal' : 'Dashboard'}
+                  </span>
+                </Link>
+                <button
+                  onClick={() => logout()}
+                  title="Sign out"
+                  className="p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition cursor-pointer"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
             ) : (
               <Link
                 href="/login"
@@ -334,10 +343,20 @@ export const PublicHeader: React.FC = () => {
           </div>
 
           {/* Mobile hamburger */}
-          <div className="flex items-center gap-2 lg:hidden">
+          <div className="flex items-center gap-1.5 lg:hidden">
+            {user && (
+              <button
+                onClick={() => logout()}
+                className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 border border-rose-200 text-xs font-semibold flex items-center gap-1 transition"
+                title="Sign out"
+              >
+                <LogOut size={14} />
+                <span className="text-[11px] hidden xs:inline">Logout</span>
+              </button>
+            )}
             <Link
               href="/request-quotation"
-              className="sm:hidden px-3 py-1.5 rounded-lg bg-sky-600 text-white text-[11px] font-bold flex items-center gap-1"
+              className="sm:hidden px-2.5 py-1.5 rounded-lg bg-sky-600 text-white text-[11px] font-bold flex items-center gap-1"
             >
               <FileText size={13} />
               Quote
@@ -423,14 +442,26 @@ export const PublicHeader: React.FC = () => {
           {/* Auth + CTA buttons */}
           <div className="pt-3 space-y-2">
             {user ? (
-              <Link
-                href={user.role === 'customer' ? '/portal' : '/dashboard'}
-                onClick={() => setMobileOpen(false)}
-                className="w-full py-3 px-4 rounded-xl bg-slate-900 text-white font-bold text-[13px] flex items-center justify-center gap-2"
-              >
-                <User size={15} />
-                {user.role === 'customer' ? 'Customer Portal' : 'Staff Dashboard'}
-              </Link>
+              <div className="space-y-2">
+                <Link
+                  href={user.role === 'customer' ? '/portal' : '/dashboard'}
+                  onClick={() => setMobileOpen(false)}
+                  className="w-full py-3 px-4 rounded-xl bg-slate-900 text-white font-bold text-[13px] flex items-center justify-center gap-2"
+                >
+                  <User size={15} />
+                  {user.role === 'customer' ? 'Customer Portal' : 'Staff Dashboard'}
+                </Link>
+                <button
+                  onClick={() => {
+                    setMobileOpen(false);
+                    logout();
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-[13px] flex items-center justify-center gap-2 border border-rose-200 transition cursor-pointer"
+                >
+                  <LogOut size={15} />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             ) : (
               <div className="grid grid-cols-2 gap-2">
                 <Link

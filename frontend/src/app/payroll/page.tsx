@@ -532,7 +532,7 @@ export default function DriverPayrollPage() {
         {/* Modal: Issue Driver Advance */}
         {isAdvanceModalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
                 <h3 className="font-bold text-slate-800 text-base">Issue Driver Salary Advance</h3>
                 <button onClick={() => setIsAdvanceModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1">
@@ -773,7 +773,7 @@ export default function DriverPayrollPage() {
         {/* Modal: Record Salary Payment */}
         {isPaymentModalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
                 <h3 className="font-bold text-slate-800 text-base">Record Driver Salary Payment</h3>
                 <button onClick={() => setIsPaymentModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1">
