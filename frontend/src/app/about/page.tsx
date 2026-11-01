@@ -20,8 +20,8 @@ export default function AboutPage() {
   }, []);
 
   const c = content || {};
-  const businessName = c.businessName || 'Lanka Premier Transport & Vehicle Hire';
-  const tagline = c.tagline || 'Reliable Vehicle Hire & Corporate Transport Solutions in Sri Lanka';
+  const businessName = c.businessName || 'Tourism & Transport';
+  const tagline = c.tagline || 'Professional Fleet & Operational Management';
   const phone = c.phone || '+94 11 234 5678';
   const email = c.publicEmail || 'inquiries@transportlanka.lk';
   const address = c.address || 'No. 142/B, High Level Road, Nugegoda, Sri Lanka';
@@ -46,10 +46,10 @@ export default function AboutPage() {
       {/* Hero */}
       <section className="bg-slate-900 text-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
+          <div className="max-w-3xl mx-auto text-center flex flex-col items-center">
             <span className="text-xs font-bold text-sky-400 uppercase tracking-wider bg-sky-950 px-3 py-1 rounded-full border border-sky-800">About Us</span>
             <h1 className="text-3xl sm:text-4xl font-black text-white mt-4 tracking-tight">{businessName}</h1>
-            <p className="text-sm sm:text-base text-slate-300 mt-4 leading-relaxed">{tagline}</p>
+            <p className="text-sm sm:text-base text-slate-300 mt-4 leading-relaxed max-w-2xl">{tagline}</p>
           </div>
         </div>
       </section>

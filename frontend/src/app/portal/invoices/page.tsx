@@ -50,7 +50,7 @@ export default function CustomerInvoicesPage() {
     // Header
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('Lanka Premier Transport & Vehicle Hire', 14, 20);
+    doc.text('Tourism & Transport', 14, 20);
 
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');

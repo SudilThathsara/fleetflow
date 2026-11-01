@@ -26,8 +26,8 @@ export default function DoubleCabHirePage() {
       {/* Hero */}
       <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-sky-950 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl space-y-3">
-            <div className="flex items-center gap-2 text-xs text-sky-400 font-semibold uppercase tracking-wider">
+          <div className="max-w-3xl mx-auto text-center space-y-3 flex flex-col items-center">
+            <div className="flex items-center justify-center gap-2 text-xs text-sky-400 font-semibold uppercase tracking-wider">
               <Link href="/services" className="hover:underline">
                 Services
               </Link>
@@ -37,7 +37,7 @@ export default function DoubleCabHirePage() {
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
               4x4 Double-Cab Hire in Sri Lanka
             </h1>
-            <p className="text-sm text-slate-300 leading-relaxed">
+            <p className="text-sm text-slate-300 leading-relaxed max-w-2xl">
               Heavy-duty four-wheel-drive Toyota Hilux, Isuzu D-Max, and Mitsubishi L200 pickups engineered for engineering construction, highway supervision, and tough outstation terrain.
             </p>
           </div>

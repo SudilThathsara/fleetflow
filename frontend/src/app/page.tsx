@@ -33,7 +33,7 @@ export default function HomePage() {
   const svc = c.servicesEnabled || {};
   const headline = c.heroHeadline || 'Reliable Vehicle Hire & Corporate Transport Solutions';
   const subheadline = c.heroSubheadline || 'Premium double cabs, spacious passenger vans, monthly corporate transport, and island-wide vehicle hire services with verified professional drivers.';
-  const businessName = c.businessName || 'Lanka Premier Transport';
+  const businessName = c.businessName || 'Tourism & Transport';
   const phone = c.phone || '+94 11 234 5678';
   const whatsapp = c.whatsappNumber || '+94771234567';
   const heroImg = c.heroImage || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=1600';
@@ -116,11 +116,6 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Text */}
             <div className="lg:col-span-7 text-white space-y-6">
-              <div className="inline-flex items-center gap-2 bg-sky-500/10 border border-sky-500/30 rounded-full px-4 py-1.5">
-                <Sparkles size={13} className="text-sky-400" />
-                <span className="text-xs font-bold text-sky-300 tracking-wider uppercase">Professional Vehicle Hire · Sri Lanka</span>
-              </div>
-
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight">
                 {headline.split(' ').slice(0, 3).join(' ')}{' '}
                 <span className="text-sky-400">{headline.split(' ').slice(3).join(' ')}</span>

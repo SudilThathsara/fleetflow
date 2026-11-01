@@ -38,7 +38,7 @@ export const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children
   const [mobileOpen, setMobileOpen] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [branding, setBranding] = useState({
-    businessName: 'Lanka Premier Transport',
+    businessName: 'Tourism & Transport',
     logoUrl: '',
   });
 
@@ -51,7 +51,7 @@ export const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children
           const parsed = JSON.parse(cached);
           if (parsed.companyName || parsed.logoUrl) {
             setBranding({
-              businessName: parsed.companyName || 'Lanka Premier Transport',
+              businessName: parsed.companyName || 'Tourism & Transport',
               logoUrl: parsed.logoUrl || '',
             });
           }
@@ -64,7 +64,7 @@ export const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children
       .then((data) => {
         if (data.success && data.data) {
           setBranding({
-            businessName: data.data.businessName || 'Lanka Premier Transport',
+            businessName: data.data.businessName || 'Tourism & Transport',
             logoUrl: data.data.logoUrl || '',
           });
         }
@@ -74,7 +74,7 @@ export const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children
     const handleSettingsUpdate = (e: any) => {
       if (e.detail) {
         setBranding({
-          businessName: e.detail.companyName || 'Lanka Premier Transport',
+          businessName: e.detail.companyName || 'Tourism & Transport',
           logoUrl: e.detail.logoUrl || '',
         });
       }

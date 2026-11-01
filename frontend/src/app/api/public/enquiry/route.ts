@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       const summary = `<strong>Name:</strong> ${name}<br/><strong>Phone:</strong> ${phone}<br/><strong>Service:</strong> ${serviceCategory || 'Transport'}<br/><strong>Vehicle:</strong> ${vehicleType || 'Not specified'}<br/><strong>Details:</strong> ${message}`;
       await sendEmail({
         to: email.trim(),
-        subject: `Enquiry Received (${enquiryId}) — Lanka Premier Transport`,
+        subject: `Enquiry Received (${enquiryId}) — Tourism & Transport`,
         html: getEnquiryReceivedHtml(name, enquiryId, summary),
         type: 'enquiry_received',
       });

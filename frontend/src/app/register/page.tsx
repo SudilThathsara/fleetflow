@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -6,7 +6,7 @@ import { Truck, Mail, Lock, Phone, User, Building, ArrowRight, AlertCircle, Chec
 
 export default function RegisterPage() {
   const [branding, setBranding] = useState({
-    companyName: 'Lanka Premier Transport',
+    companyName: 'Tourism & Transport',
     tagline: 'Track Vehicle Hires, Quotations & Invoices Online',
     logoUrl: '',
   });
@@ -31,7 +31,7 @@ export default function RegisterPage() {
       .then((data) => {
         if (data.success && data.data) {
           setBranding({
-            companyName: data.data.companyName || 'Lanka Premier Transport',
+            companyName: data.data.companyName || 'Tourism & Transport',
             tagline: data.data.tagline || 'Track Vehicle Hires, Quotations & Invoices Online',
             logoUrl: data.data.logoUrl || '',
           });
