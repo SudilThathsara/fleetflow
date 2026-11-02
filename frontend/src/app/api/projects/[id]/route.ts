@@ -1,11 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Project from '@/models/Project';
 import Contract from '@/models/Contract';
 import RunningChartEntry from '@/models/RunningChartEntry';
+import { requireAuth, requireStaffAuth } from '@/lib/auth';
 
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { errorResponse } = requireStaffAuth(req);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { id } = await params;
     const project = await Project.findById(id);
@@ -18,8 +22,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   }
 }
 
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { errorResponse } = requireAuth(req, ['super_admin', 'manager', 'operations']);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { id } = await params;
     const body = await req.json();
@@ -31,8 +38,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { errorResponse } = requireAuth(req, ['super_admin', 'manager']);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { id } = await params;
     const deleted = await Project.findByIdAndDelete(id);
@@ -42,3 +52,4 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     return NextResponse.json({ success: false, message: err.message }, { status: 500 });
   }
 }
+

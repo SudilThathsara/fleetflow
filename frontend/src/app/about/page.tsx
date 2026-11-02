@@ -16,7 +16,7 @@ export default function AboutPage() {
     fetch('/api/public/content')
       .then((r) => r.json())
       .then((d) => { if (d.success && d.data) setContent(d.data); })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const c = content || {};

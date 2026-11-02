@@ -145,10 +145,14 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    await connectDB();
     const auth = getAuthUser(req);
+    if (!auth) {
+      return NextResponse.json({ success: false, message: 'Authentication required' }, { status: 401 });
+    }
+
+    await connectDB();
     const query: any = {};
-    if (auth && auth.role === 'customer') {
+    if (auth.role === 'customer') {
       query.$or = [{ user: auth.id }, { customerEmail: auth.email.toLowerCase() }];
     }
 
@@ -162,3 +166,4 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
+

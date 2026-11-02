@@ -10,14 +10,23 @@ export async function GET(req: NextRequest) {
     if (errorResponse) return errorResponse;
 
     await connectDB();
-    const customer = await Customer.findOne({ email: user?.email.toLowerCase() });
+    let customer = null;
+    if (user?.customerId) {
+      customer = await Customer.findById(user.customerId);
+    }
+    if (!customer && user?.email) {
+      customer = await Customer.findOne({ email: user.email.toLowerCase() });
+    }
 
-    const query: any = {
-      $or: [
-        ...(customer ? [{ customer: customer._id }] : []),
-        { customerEmail: user?.email.toLowerCase() },
-      ],
-    };
+    const orConditions: any[] = [];
+    if (customer) {
+      orConditions.push({ customer: customer._id });
+    }
+    if (user?.email) {
+      orConditions.push({ customerEmail: user.email.toLowerCase() });
+    }
+
+    const query: any = orConditions.length > 0 ? { $or: orConditions } : { _id: null };
 
     const quotations = await Quotation.find(query).sort({ createdAt: -1 });
     return NextResponse.json({ success: true, count: quotations.length, data: quotations });

@@ -1,13 +1,17 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import PayrollPeriod from '@/models/PayrollPeriod';
 import Driver from '@/models/Driver';
 import RunningChartEntry from '@/models/RunningChartEntry';
 import DriverAdvance from '@/models/DriverAdvance';
 import CompanySettings from '@/models/CompanySettings';
+import { requireAuth } from '@/lib/auth';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const { errorResponse } = requireAuth(req, ['super_admin', 'manager', 'accountant']);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { monthYear } = await req.json();
     if (!monthYear) return NextResponse.json({ success: false, message: 'monthYear required' }, { status: 400 });

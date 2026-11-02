@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
   LayoutDashboard,
@@ -66,10 +66,21 @@ const navigationItems: SidebarItem[] = [
 
 export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const router = useRouter();
+  const { user, logout, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [companyName, setCompanyName] = useState('FleetFlow Lanka');
   const [companyLogo, setCompanyLogo] = useState('');
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        router.replace('/login');
+      } else if (user.role === 'customer') {
+        router.replace('/unauthorized');
+      }
+    }
+  }, [user, loading, router]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -115,6 +126,21 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Group by category
   const categories = ['Fleet & Operations', 'Maintenance & Stores', 'Finance & Invoicing', 'Marketing & Leads', 'System'];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-medium text-slate-300">Loading Management Console...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || user.role === 'customer') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen min-w-0 bg-slate-50 flex flex-col md:flex-row text-slate-900 font-sans">

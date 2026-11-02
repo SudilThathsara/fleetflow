@@ -10,15 +10,27 @@ export async function GET(req: NextRequest) {
     if (errorResponse) return errorResponse;
 
     await connectDB();
-    const customer = await Customer.findOne({ email: user?.email.toLowerCase() });
+    let customer = null;
+    if (user?.customerId) {
+      customer = await Customer.findById(user.customerId);
+    }
+    if (!customer && user?.email) {
+      customer = await Customer.findOne({ email: user.email.toLowerCase() });
+    }
 
-    const query: any = {
-      $or: [
-        ...(customer ? [{ customer: customer._id }] : []),
-        ...(user?.customerCompanyId ? [{ customerCompany: user.customerCompanyId }] : []),
-        { customerPhone: customer?.phone || 'none' },
-      ],
-    };
+    const orConditions: any[] = [];
+    if (customer) {
+      orConditions.push({ customer: customer._id });
+      if (customer.phone) orConditions.push({ customerPhone: customer.phone });
+    }
+    if (user?.customerCompanyId) {
+      orConditions.push({ customerCompany: user.customerCompanyId });
+    }
+    if (user?.email) {
+      orConditions.push({ customerEmail: user.email.toLowerCase() });
+    }
+
+    const query: any = orConditions.length > 0 ? { $or: orConditions } : { _id: null };
 
     const invoices = await Invoice.find(query).sort({ issueDate: -1 });
     return NextResponse.json({ success: true, count: invoices.length, data: invoices });

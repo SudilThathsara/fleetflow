@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Vehicle from '@/models/Vehicle';
 import Driver from '@/models/Driver';
@@ -13,9 +13,13 @@ import CustomerCompany from '@/models/CustomerCompany';
 import Project from '@/models/Project';
 import Contract from '@/models/Contract';
 import SparePart from '@/models/SparePart';
+import { requireStaffAuth } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { errorResponse } = requireStaffAuth(req);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
 
     // 1. Vehicle counts

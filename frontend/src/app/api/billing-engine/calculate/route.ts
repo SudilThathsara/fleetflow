@@ -1,10 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Contract from '@/models/Contract';
 import RunningChartEntry from '@/models/RunningChartEntry';
+import { requireAuth } from '@/lib/auth';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const { errorResponse } = requireAuth(req, ['super_admin', 'manager', 'accountant']);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { contractId, billingMonth } = await req.json();
 

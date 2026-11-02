@@ -13,7 +13,7 @@ export default function QuotationsPage() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [companySettings, setCompanySettings] = useState<any>({});
+  const [settings, setSettings] = useState<any>({});
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,16 +38,19 @@ export default function QuotationsPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [qRes, cRes] = await Promise.all([
+      const [qRes, cRes, settingsRes] = await Promise.all([
         fetch(`/api/quotations?search=${encodeURIComponent(search)}`),
         fetch('/api/customers'),
+        fetch('/api/settings'),
       ]);
-      const [qData, cData] = await Promise.all([qRes.json(), cRes.json()]);
+      const [qData, cData, settingsData] = await Promise.all([
+        qRes.json(),
+        cRes.json(),
+        settingsRes.json(),
+      ]);
       if (qData.success) setQuotations(qData.data);
       if (cData.success) setCustomers(cData.data);
-      const settingsRes = await fetch('/api/settings', { cache: 'no-store' });
-      const settingsData = await settingsRes.json();
-      if (settingsData.success) setCompanySettings(settingsData.data || {});
+      if (settingsData.success && settingsData.data) setSettings(settingsData.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -162,23 +165,40 @@ export default function QuotationsPage() {
     }
   };
 
-  // Download Quotation PDF
+  // Download Quotation PDF with Company Logo
   const downloadQuotationPDF = (q: any) => {
     const doc = new jsPDF();
 
-    doc.setFontSize(20);
-    doc.setTextColor(15, 23, 42);
-    doc.text(companySettings.companyName || 'FleetFlow Lanka (Pvt) Ltd', 14, 20);
+    let startX = 14;
+    const hasLogo = Boolean(settings?.logoUrl && settings.logoUrl.startsWith('data:image'));
 
-    doc.setFontSize(9);
+    if (hasLogo) {
+      try {
+        const isPng = settings.logoUrl.startsWith('data:image/png');
+        const format = isPng ? 'PNG' : 'JPEG';
+        doc.addImage(settings.logoUrl, format, 14, 11, 28, 22);
+        startX = 46;
+      } catch (err) {
+        console.warn('Could not add logo to Quotation PDF:', err);
+      }
+    }
+
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text(settings?.companyName || 'Transport & Tourism', startX, 18);
+
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'normal');
     doc.setTextColor(100);
-    doc.text(companySettings.tagline || 'Transport Quotation & Hire Estimate', 14, 26);
-    doc.text(`${companySettings.address || 'No 142/B, High Level Road, Nugegoda, Sri Lanka'} | ${companySettings.phone || '+94 11 234 5678'}`, 14, 31);
+    doc.text(settings?.tagline || 'Transport Quotation & Hire Estimate', startX, 24);
+    doc.text(`${settings?.address || 'No 142/B, High Level Road, Nugegoda, Sri Lanka'} | ${settings?.phone || '+94 11 234 5678'}`, startX, 29);
 
     doc.setDrawColor(220);
     doc.line(14, 38, 196, 38);
 
     doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(15, 23, 42);
     doc.text(`QUOTATION: ${q.quotationNumber}`, 14, 48);
 
@@ -215,7 +235,7 @@ export default function QuotationsPage() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(120);
-    doc.text(`Terms & Conditions:\n${q.terms || companySettings.terms || 'Valid for 14 days from issue date.'}`, 14, finalY + 25);
+    doc.text(`Terms & Conditions:\n${q.terms || settings.terms || 'Valid for 14 days from issue date.'}`, 14, finalY + 25);
 
     doc.save(`${q.quotationNumber}.pdf`);
   };
