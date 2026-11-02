@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import User from '@/models/User';
 import Vehicle from '@/models/Vehicle';
@@ -17,10 +17,18 @@ import SocialPostTemplate from '@/models/SocialPostTemplate';
 import SocialPostDraft from '@/models/SocialPostDraft';
 import CompanySettings from '@/models/CompanySettings';
 import bcrypt from 'bcryptjs';
+import { requireAuth } from '@/lib/auth';
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
     await connectDB();
+
+    // Guard seed route: if system already initialized, require super_admin
+    const userCount = await User.countDocuments();
+    if (userCount > 0) {
+      const { errorResponse } = requireAuth(req, ['super_admin']);
+      if (errorResponse) return errorResponse;
+    }
 
     // 1. Settings
     let settings = await CompanySettings.findOne();

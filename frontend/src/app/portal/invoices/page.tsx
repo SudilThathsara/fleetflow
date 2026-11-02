@@ -12,6 +12,7 @@ import {
   CreditCard,
   DollarSign,
   Info,
+  Printer,
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -21,6 +22,7 @@ export default function CustomerInvoicesPage() {
   const [loading, setLoading] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
   const [bankDetails, setBankDetails] = useState('');
+  const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
     fetch('/api/portal/invoices')
@@ -37,8 +39,11 @@ export default function CustomerInvoicesPage() {
     fetch('/api/settings')
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && data.data?.bankAccountDetails) {
-          setBankDetails(data.data.bankAccountDetails);
+        if (data.success && data.data) {
+          setSettings(data.data);
+          if (data.data.bankAccountDetails) {
+            setBankDetails(data.data.bankAccountDetails);
+          }
         }
       })
       .catch(() => {});
@@ -47,23 +52,37 @@ export default function CustomerInvoicesPage() {
   const downloadInvoicePdf = (inv: any) => {
     const doc = new jsPDF();
 
+    let startX = 14;
+    const hasLogo = Boolean(settings?.logoUrl && settings.logoUrl.startsWith('data:image'));
+
+    if (hasLogo) {
+      try {
+        const isPng = settings.logoUrl.startsWith('data:image/png');
+        const format = isPng ? 'PNG' : 'JPEG';
+        doc.addImage(settings.logoUrl, format, 14, 11, 28, 22);
+        startX = 46;
+      } catch (err) {
+        console.warn('Could not add logo to PDF:', err);
+      }
+    }
+
     // Header
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('Tourism & Transport', 14, 20);
+    doc.text(settings?.companyName || 'Tourism & Transport', startX, 18);
 
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('Enterprise Vehicle Fleet & Transport Operations Management', 14, 26);
-    doc.text('No. 142/B, High Level Road, Nugegoda, Sri Lanka | Phone: +94 11 234 5678', 14, 31);
+    doc.text(settings?.tagline || 'Enterprise Vehicle Fleet & Transport Operations Management', startX, 24);
+    doc.text(`${settings?.address || 'No. 142/B, High Level Road, Nugegoda, Sri Lanka'} | Phone: ${settings?.phone || '+94 11 234 5678'}`, startX, 29);
 
     doc.setDrawColor(200, 200, 200);
-    doc.line(14, 35, 196, 35);
+    doc.line(14, 37, 196, 37);
 
     // Invoice Meta
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text(`TAX INVOICE: ${inv.invoiceNumber}`, 14, 44);
+    doc.text(`TAX INVOICE: ${inv.invoiceNumber}`, 14, 46);
 
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
@@ -193,20 +212,40 @@ export default function CustomerInvoicesPage() {
             <div className="lg:col-span-7">
               {selectedInvoice ? (
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
-                  {/* Title and Download */}
+                  {/* Title, Logo and Download */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                    <div>
-                      <span className="text-[11px] font-mono text-slate-400">Tax Invoice</span>
-                      <h3 className="text-xl font-black text-slate-900">{selectedInvoice.invoiceNumber}</h3>
+                    <div className="flex items-center gap-3">
+                      {settings?.logoUrl && (
+                        <img
+                          src={settings.logoUrl}
+                          alt={settings.companyName || 'Company Logo'}
+                          className="h-12 w-auto max-w-[120px] object-contain rounded-md border border-slate-100 p-1"
+                        />
+                      )}
+                      <div>
+                        <span className="text-[11px] font-mono text-slate-400">Tax Invoice</span>
+                        <h3 className="text-xl font-black text-slate-900">{selectedInvoice.invoiceNumber}</h3>
+                      </div>
                     </div>
 
-                    <button
-                      onClick={() => downloadInvoicePdf(selectedInvoice)}
-                      className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
-                    >
-                      <Download size={14} />
-                      <span>Download Invoice PDF</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => window.print()}
+                        className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                      >
+                        <Printer size={14} />
+                        <span>Print</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => downloadInvoicePdf(selectedInvoice)}
+                        className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                      >
+                        <Download size={14} />
+                        <span>Download PDF</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Dates & Status */}

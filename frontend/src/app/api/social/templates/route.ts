@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import SocialPostTemplate from '@/models/SocialPostTemplate';
+import { requireStaffAuth } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { errorResponse } = requireStaffAuth(req);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const templates = await SocialPostTemplate.find().sort({ createdAt: -1 });
     return NextResponse.json({ success: true, count: templates.length, data: templates });
@@ -12,8 +16,11 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const { errorResponse } = requireStaffAuth(req);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const body = await req.json();
     const count = await SocialPostTemplate.countDocuments();
@@ -24,3 +31,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, message: err.message }, { status: 500 });
   }
 }
+

@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Driver from '@/models/Driver';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, requireStaffAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { errorResponse } = requireStaffAuth(req);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { id } = await params;
     const driver = await Driver.findById(id);

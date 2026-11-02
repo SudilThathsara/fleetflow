@@ -1,10 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import SparePart from '@/models/SparePart';
 import InventoryTransaction from '@/models/InventoryTransaction';
+import { requireAuth } from '@/lib/auth';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const { errorResponse } = requireAuth(req, ['super_admin', 'manager', 'maintenance']);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { partId, newQuantity, reason, notes } = await req.json();
 

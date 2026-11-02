@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Contract from '@/models/Contract';
+import { requireAuth, requireStaffAuth } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { errorResponse } = requireStaffAuth(req);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const contracts = await Contract.find().sort({ createdAt: -1 });
     return NextResponse.json({ success: true, count: contracts.length, data: contracts });
@@ -12,8 +16,11 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const { errorResponse } = requireAuth(req, ['super_admin', 'manager', 'accountant']);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const body = await req.json();
     const count = await Contract.countDocuments();
@@ -40,3 +47,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, message: err.message }, { status: 500 });
   }
 }
+

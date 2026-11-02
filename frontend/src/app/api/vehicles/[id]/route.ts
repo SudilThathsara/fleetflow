@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Vehicle from '@/models/Vehicle';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, requireStaffAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { errorResponse } = requireStaffAuth(req);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { id } = await params;
     const vehicle = await Vehicle.findById(id);

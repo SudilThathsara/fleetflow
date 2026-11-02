@@ -98,12 +98,16 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    await connectDB();
     const auth = getAuthUser(req);
+    if (!auth) {
+      return NextResponse.json({ success: false, message: 'Authentication required' }, { status: 401 });
+    }
+
+    await connectDB();
     // Customer can see their own enquiries; staff can see all
     const query: any = {};
-    if (auth && auth.role === 'customer') {
-      query.user = auth.id;
+    if (auth.role === 'customer') {
+      query.$or = [{ user: auth.id }, { email: auth.email?.toLowerCase() }];
     }
 
     const enquiries = await WebsiteEnquiry.find(query).sort({ createdAt: -1 }).limit(100);
@@ -112,3 +116,4 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
+

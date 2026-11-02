@@ -1,7 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import VehicleService from '@/models/VehicleService';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, requireStaffAuth } from '@/lib/auth';
+
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { errorResponse } = requireStaffAuth(req);
+    if (errorResponse) return errorResponse;
+
+    await connectDB();
+    const { id } = await params;
+    const service = await VehicleService.findById(id).populate('vehicle');
+    if (!service) {
+      return NextResponse.json({ success: false, message: 'Service record not found' }, { status: 404 });
+    }
+    return NextResponse.json({ success: true, data: service });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
+}
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
