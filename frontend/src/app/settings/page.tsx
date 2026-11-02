@@ -28,8 +28,8 @@ interface WebsiteContent {
 }
 
 const DEFAULT_WEBSITE: WebsiteContent = {
-  businessName: 'Lanka Premier Transport & Vehicle Hire',
-  tagline: 'Reliable Vehicle Hire & Corporate Transport Solutions in Sri Lanka',
+  businessName: 'Tourism & Transport',
+  tagline: 'Professional Fleet & Operational Management',
   logoUrl: '', faviconUrl: '',
   heroHeadline: 'Reliable Vehicle Hire & Corporate Transport Solutions',
   heroSubheadline: 'Premium double cabs, spacious passenger vans, monthly corporate transport, and island-wide vehicle hire services with verified professional drivers.',

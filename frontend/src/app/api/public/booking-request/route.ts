@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     const details = `<strong>Request ID:</strong> ${requestId}<br/><strong>Vehicle:</strong> ${vehicleCategory}<br/><strong>Pickup:</strong> ${pickupLocation} on ${pDate.toLocaleString()}<br/><strong>Destination:</strong> ${destination}<br/><strong>Status:</strong> Pending Operations Verification`;
     await sendEmail({
       to: customerEmail.trim(),
-      subject: `Booking Request Received (${requestId}) — Lanka Premier Transport`,
+      subject: `Booking Request Received (${requestId}) — Tourism & Transport`,
       html: getBookingStatusHtml(customerName, requestId, 'Pending Verification', details),
       type: 'booking_received',
     });

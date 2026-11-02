@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
       await sendEmail({
         to: cleanEmail,
-        subject: 'Password Reset Request — Lanka Premier Transport',
+        subject: 'Password Reset Request — Tourism & Transport',
         html: getPasswordResetEmailHtml(user.name, resetUrl),
         type: 'password_reset',
       });

@@ -3390,6 +3390,19 @@ app.post('/api/seed', async (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 FleetFlow Enterprise Master Backend running on port ${PORT}`);
 });
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    const fallbackPort = Number(PORT) + 1;
+    console.warn(`⚠️ Port ${PORT} is in use (macOS AirPlay). Falling back to port ${fallbackPort}...`);
+    app.listen(fallbackPort, () => {
+      console.log(`🚀 FleetFlow Enterprise Master Backend running on port ${fallbackPort}`);
+    });
+  } else {
+    console.error('Server error:', err);
+  }
+});
+

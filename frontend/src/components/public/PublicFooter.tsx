@@ -23,8 +23,8 @@ interface SiteContent {
 }
 
 const DEF: SiteContent = {
-  businessName: 'Lanka Premier Transport & Vehicle Hire',
-  tagline: 'Reliable Vehicle Hire & Corporate Transport Solutions in Sri Lanka',
+  businessName: 'Tourism & Transport',
+  tagline: 'Professional Fleet & Operational Management',
   phone: '+94 11 234 5678 / +94 77 123 4567',
   whatsappNumber: '+94771234567',
   publicEmail: 'inquiries@transportlanka.lk',
@@ -269,12 +269,23 @@ export const PublicFooter: React.FC = () => {
 
       {/* Bottom bar */}
       <div className="border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-600">
-          <p>© {new Date().getFullYear()} {c.businessName}. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <Link href="/privacy" className="hover:text-slate-400 transition">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-slate-400 transition">Terms & Conditions</Link>
-            <Link href="/sitemap.xml" className="hover:text-slate-400 transition">Sitemap</Link>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm text-slate-300">
+          <p>
+            © {new Date().getFullYear()}{' '}
+            <a
+              href="https://raxwo.net/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-400 underline underline-offset-4 decoration-sky-400 hover:text-sky-300 hover:decoration-sky-300 transition-colors font-medium"
+            >
+              Raxwo (Pvt) LTD.
+            </a>{' '}
+            All rights reserved.
+          </p>
+          <div className="flex items-center gap-4 text-xs text-slate-400">
+            <Link href="/privacy" className="hover:text-slate-200 transition">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-slate-200 transition">Terms & Conditions</Link>
+            <Link href="/sitemap.xml" className="hover:text-slate-200 transition">Sitemap</Link>
           </div>
         </div>
       </div>
