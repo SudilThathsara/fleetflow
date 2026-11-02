@@ -10,14 +10,23 @@ export async function GET(req: NextRequest) {
     if (errorResponse) return errorResponse;
 
     await connectDB();
-    const customer = await Customer.findOne({ email: user?.email.toLowerCase() });
-
-    const query: any = {};
-    if (customer) {
-      query.customer = customer._id;
-    } else {
-      query.customerName = user?.name;
+    let customer = null;
+    if (user?.customerId) {
+      customer = await Customer.findById(user.customerId);
     }
+    if (!customer && user?.email) {
+      customer = await Customer.findOne({ email: user.email.toLowerCase() });
+    }
+
+    const orConditions: any[] = [];
+    if (customer) {
+      orConditions.push({ customer: customer._id });
+    }
+    if (user?.name) {
+      orConditions.push({ customerName: user.name });
+    }
+
+    const query: any = orConditions.length > 0 ? { $or: orConditions } : { _id: null };
 
     const payments = await Payment.find(query).sort({ paymentDate: -1 });
     return NextResponse.json({ success: true, count: payments.length, data: payments });

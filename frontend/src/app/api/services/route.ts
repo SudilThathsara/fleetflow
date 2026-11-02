@@ -4,10 +4,13 @@ import VehicleService from '@/models/VehicleService';
 import Vehicle from '@/models/Vehicle';
 import SparePart from '@/models/SparePart';
 import InventoryTransaction from '@/models/InventoryTransaction';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, requireStaffAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
+    const { errorResponse } = requireStaffAuth(req);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { searchParams } = new URL(req.url);
     const vehicleId = searchParams.get('vehicleId');
@@ -26,6 +29,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const { errorResponse } = requireAuth(req, ['super_admin', 'manager', 'maintenance', 'operations']);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const body = await req.json();
 

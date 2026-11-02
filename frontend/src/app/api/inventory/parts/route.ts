@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import SparePart from '@/models/SparePart';
+import { requireAuth, requireStaffAuth } from '@/lib/auth';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
+    const { errorResponse } = requireStaffAuth(req);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');
@@ -26,8 +30,11 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const { errorResponse } = requireAuth(req, ['super_admin', 'manager', 'maintenance', 'operations']);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const body = await req.json();
     const count = await SparePart.countDocuments();
@@ -38,3 +45,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, message: err.message }, { status: 500 });
   }
 }
+

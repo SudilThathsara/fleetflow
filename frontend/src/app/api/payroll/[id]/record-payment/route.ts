@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import PayrollPeriod from '@/models/PayrollPeriod';
+import { requireAuth } from '@/lib/auth';
 
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { errorResponse } = requireAuth(req, ['super_admin', 'manager', 'accountant']);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { id } = await params;
     const { driverId, amount, paymentReference, notes } = await req.json();

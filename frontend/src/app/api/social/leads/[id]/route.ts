@@ -5,10 +5,13 @@ import Vehicle from '@/models/Vehicle';
 import Driver from '@/models/Driver';
 import Supplier from '@/models/Supplier';
 import Customer from '@/models/Customer';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, requireStaffAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { errorResponse } = requireStaffAuth(req);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { id } = await params;
     const lead = await SocialLead.findById(id);

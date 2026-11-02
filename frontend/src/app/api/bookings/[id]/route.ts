@@ -4,10 +4,13 @@ import Booking from '@/models/Booking';
 import Vehicle from '@/models/Vehicle';
 import Driver from '@/models/Driver';
 import RunningChartEntry from '@/models/RunningChartEntry';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, requireStaffAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { errorResponse } = requireStaffAuth(req);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { id } = await params;
     const booking = await Booking.findById(id);

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
-import { Receipt, Plus, Search, Trash2, Edit2, FileDown, CheckCircle, Clock, X } from 'lucide-react';
+import { Receipt, Plus, Search, Trash2, Edit2, FileDown, CheckCircle, Clock, X, Printer } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -13,11 +13,25 @@ export default function InvoicesPage() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [companySettings, setCompanySettings] = useState<any>({});
+
+  // Branding Settings for Invoices & Logo
+  const [settings, setSettings] = useState<any>({
+    companyName: 'Transport & Tourism',
+    tagline: 'Enterprise Fleet & Transport Operations Management',
+    logoUrl: '',
+    phone: '+94 11 234 5678 / +94 77 123 4567',
+    email: 'operations@fleetflowlanka.lk',
+    address: 'No. 142/B, High Level Road, Nugegoda, Sri Lanka',
+    vatNumber: 'VAT-10928374-7000',
+    brNumber: 'PV-98765/2024',
+    currency: 'LKR',
+    bankAccountDetails: 'Commercial Bank of Ceylon\nAccount: 1000987654\nBranch: Nugegoda\nBeneficiary: Transport & Tourism (Pvt) Ltd',
+  });
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<any>(null);
+  const [viewingInvoice, setViewingInvoice] = useState<any>(null);
 
   const [formData, setFormData] = useState({
     customer: '',
@@ -37,16 +51,19 @@ export default function InvoicesPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [invRes, custRes] = await Promise.all([
+      const [invRes, custRes, settingsRes] = await Promise.all([
         fetch(`/api/invoices?search=${encodeURIComponent(search)}`),
         fetch('/api/customers'),
+        fetch('/api/settings'),
       ]);
-      const [invData, custData] = await Promise.all([invRes.json(), custRes.json()]);
+      const [invData, custData, settingsData] = await Promise.all([
+        invRes.json(),
+        custRes.json(),
+        settingsRes.json(),
+      ]);
       if (invData.success) setInvoices(invData.data);
       if (custData.success) setCustomers(custData.data);
-      const settingsRes = await fetch('/api/settings', { cache: 'no-store' });
-      const settingsData = await settingsRes.json();
-      if (settingsData.success) setCompanySettings(settingsData.data || {});
+      if (settingsData.success && settingsData.data) setSettings((prev: any) => ({ ...prev, ...settingsData.data }));
     } catch (err) {
       console.error(err);
     } finally {
@@ -157,52 +174,75 @@ export default function InvoicesPage() {
     }
   };
 
-  // Generate Professional Invoice PDF
+  // Generate Professional Invoice PDF with Company Logo
   const downloadInvoicePDF = (inv: any) => {
     const doc = new jsPDF();
 
-    // Brand Header
-    doc.setFontSize(20);
-    doc.setTextColor(15, 23, 42); // slate-900
-    doc.text(companySettings.companyName || 'FleetFlow Lanka (Pvt) Ltd', 14, 20);
+    let startX = 14;
+    const hasLogo = Boolean(settings?.logoUrl && settings.logoUrl.startsWith('data:image'));
 
-    doc.setFontSize(9);
+    if (hasLogo) {
+      try {
+        const isPng = settings.logoUrl.startsWith('data:image/png');
+        const format = isPng ? 'PNG' : 'JPEG';
+        // Add company logo at top-left
+        doc.addImage(settings.logoUrl, format, 14, 11, 28, 24);
+        startX = 46;
+      } catch (err) {
+        console.warn('Could not add logo to PDF:', err);
+      }
+    }
+
+    // Brand Header
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42); // slate-900
+    doc.text(settings?.companyName || 'Transport & Tourism', startX, 18);
+
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'normal');
     doc.setTextColor(100);
-    doc.text(companySettings.tagline || 'Enterprise Transport Operations & Fleet Management', 14, 26);
-    doc.text(companySettings.address || 'No 142/B, High Level Road, Nugegoda, Sri Lanka', 14, 31);
-    doc.text(`Tel: ${companySettings.phone || '+94 11 234 5678'} | Email: ${companySettings.email || 'billing@fleetflowlanka.lk'}`, 14, 36);
+    doc.text(settings?.tagline || 'Enterprise Transport Operations & Fleet Management', startX, 24);
+    doc.text(settings?.address || 'No. 142/B, High Level Road, Nugegoda, Sri Lanka', startX, 29);
+    doc.text(`Tel: ${settings?.phone || '+94 11 234 5678'} | Email: ${settings?.email || 'operations@fleetflowlanka.lk'}`, startX, 34);
+    if (settings?.vatNumber || settings?.brNumber) {
+      doc.text(`VAT/Tax: ${settings.vatNumber || 'N/A'} | BR Reg: ${settings.brNumber || 'N/A'}`, startX, 39);
+    }
 
     doc.setDrawColor(220);
-    doc.line(14, 42, 196, 42);
+    doc.line(14, 44, 196, 44);
 
     // Invoice Meta
     doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(15, 23, 42);
-    doc.text(`INVOICE: ${inv.invoiceNumber}`, 14, 52);
+    doc.text(`INVOICE: ${inv.invoiceNumber}`, 14, 54);
 
     doc.setFontSize(9);
-    doc.text(`Issue Date: ${new Date(inv.issueDate).toLocaleDateString()}`, 14, 58);
-    doc.text(`Due Date: ${new Date(inv.dueDate).toLocaleDateString()}`, 14, 63);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Issue Date: ${new Date(inv.issueDate).toLocaleDateString()}`, 14, 60);
+    doc.text(`Due Date: ${new Date(inv.dueDate).toLocaleDateString()}`, 14, 65);
+    doc.text(`Status: ${inv.status.toUpperCase()}`, 14, 70);
 
     // Bill To
-    doc.text(`Billed To:`, 120, 52);
+    doc.text(`Billed To:`, 120, 54);
     doc.setFont('helvetica', 'bold');
-    doc.text(`${inv.customerName}`, 120, 58);
+    doc.text(`${inv.customerName}`, 120, 60);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Phone: ${inv.customerPhone}`, 120, 63);
-    doc.text(`${inv.customerAddress || 'Colombo'}`, 120, 68);
+    doc.text(`Phone: ${inv.customerPhone || 'N/A'}`, 120, 65);
+    doc.text(`${inv.customerAddress || 'Colombo, Sri Lanka'}`, 120, 70);
 
     // Items Table
     const tableData = (inv.items || []).map((it: any) => [
       it.description,
       it.vehicleReg || 'N/A',
       it.quantity,
-      `Rs. ${it.unitPrice?.toLocaleString()}`,
-      `Rs. ${it.total?.toLocaleString()}`,
+      `Rs. ${Number(it.unitPrice || 0).toLocaleString()}`,
+      `Rs. ${Number(it.total || 0).toLocaleString()}`,
     ]);
 
     autoTable(doc, {
-      startY: 76,
+      startY: 77,
       head: [['Description / Service', 'Vehicle', 'Qty', 'Unit Price', 'Line Total']],
       body: tableData,
       theme: 'striped',
@@ -212,18 +252,29 @@ export default function InvoicesPage() {
     // Summary block
     const finalY = (doc as any).lastAutoTable.finalY + 10;
     doc.setFontSize(10);
-    doc.text(`Subtotal: Rs. ${inv.subtotal?.toLocaleString()}`, 140, finalY);
-    doc.text(`Amount Paid: Rs. ${inv.paidAmount?.toLocaleString()}`, 140, finalY + 6);
+    doc.text(`Subtotal: Rs. ${Number(inv.subtotal || 0).toLocaleString()}`, 135, finalY);
+    if (inv.taxAmount > 0) {
+      doc.text(`VAT/Tax: Rs. ${Number(inv.taxAmount).toLocaleString()}`, 135, finalY + 6);
+    }
+    doc.text(`Amount Paid: Rs. ${Number(inv.paidAmount || 0).toLocaleString()}`, 135, finalY + 12);
     doc.setFont('helvetica', 'bold');
-    doc.text(`Balance Due: Rs. ${inv.balanceDue?.toLocaleString()}`, 140, finalY + 13);
+    doc.text(`Balance Due: Rs. ${Number(inv.balanceDue || 0).toLocaleString()}`, 135, finalY + 19);
 
-    // Terms
+    // Bank Details & Payment Instructions
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(15, 23, 42);
+    doc.text('Payment Instructions & Bank Account Details:', 14, finalY + 28);
+
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    doc.setTextColor(120);
-    const terms = companySettings.terms || 'Payment is due within 30 days.';
-    const bankDetails = companySettings.bankAccountDetails || '';
-    doc.text(`${terms}${bankDetails ? ` ${bankDetails.replace(/\n/g, ' | ')}` : ''}`, 14, finalY + 25);
+    doc.setTextColor(100);
+    const bankLines = doc.splitTextToSize(
+      settings?.bankAccountDetails ||
+        'Commercial Bank of Ceylon\nAccount: 1000987654\nBranch: Nugegoda\nBeneficiary: Transport & Tourism (Pvt) Ltd',
+      180
+    );
+    doc.text(bankLines, 14, finalY + 34);
 
     doc.save(`${inv.invoiceNumber}.pdf`);
   };
@@ -325,6 +376,13 @@ export default function InvoicesPage() {
                         </span>
                       </td>
                       <td className="p-4 pr-6 text-right space-x-1.5">
+                        <button
+                          onClick={() => setViewingInvoice(inv)}
+                          className="p-1.5 text-slate-500 hover:text-sky-600 hover:bg-slate-100 rounded-lg transition-colors"
+                          title="Print / View Invoice"
+                        >
+                          <Printer size={16} />
+                        </button>
                         <button
                           onClick={() => downloadInvoicePDF(inv)}
                           className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-slate-100 rounded-lg transition-colors"
@@ -489,6 +547,223 @@ export default function InvoicesPage() {
           </div>
         </div>
       )}
+
+      {/* Printable Invoice Modal with Company Logo */}
+      {viewingInvoice && (
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-4xl w-full p-4 sm:p-8 shadow-2xl border border-slate-100 my-4 sm:my-8 max-h-[92vh] overflow-y-auto">
+            {/* Modal Controls Bar (hidden during print) */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200 mb-6 print:hidden">
+              <div className="flex items-center gap-2">
+                <Receipt className="text-blue-600" size={22} />
+                <span className="font-bold text-slate-800 text-lg">Official Invoice Print Preview</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition cursor-pointer"
+                >
+                  <Printer size={14} />
+                  <span>Print Invoice</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => downloadInvoicePDF(viewingInvoice)}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition cursor-pointer"
+                >
+                  <FileDown size={14} />
+                  <span>Download PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewingInvoice(null)}
+                  className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Printable Document Sheet */}
+            <div id="printable-invoice" className="bg-white p-6 sm:p-10 border border-slate-200 rounded-xl space-y-6 text-slate-900">
+              {/* Header with Logo */}
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6 border-b-2 border-slate-900">
+                <div className="flex items-start gap-4">
+                  {settings?.logoUrl ? (
+                    <img
+                      src={settings.logoUrl}
+                      alt={settings.companyName || 'Company Logo'}
+                      className="h-16 w-auto max-w-[140px] object-contain rounded-lg border border-slate-100 p-1 shadow-xs"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-blue-600 text-white rounded-xl flex items-center justify-center font-black text-2xl shadow-sm">
+                      {(settings?.companyName || 'FF').slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                      {settings?.companyName || 'FleetFlow Lanka (Pvt) Ltd'}
+                    </h1>
+                    <p className="text-xs text-slate-500 font-medium">{settings?.tagline || 'Enterprise Transport Operations & Fleet Management'}</p>
+                    <p className="text-xs text-slate-600 mt-1">{settings?.address || 'No. 142/B, High Level Road, Nugegoda, Sri Lanka'}</p>
+                    <p className="text-xs text-slate-600">
+                      Hotline: <span className="font-semibold">{settings?.phone || '+94 11 234 5678'}</span> | Email: <span className="font-semibold">{settings?.email || 'operations@fleetflowlanka.lk'}</span>
+                    </p>
+                    {(settings?.vatNumber || settings?.brNumber) && (
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        {settings.vatNumber && <span>VAT/Tax: <strong>{settings.vatNumber}</strong> </span>}
+                        {settings.brNumber && <span>| BR Reg: <strong>{settings.brNumber}</strong></span>}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="text-left sm:text-right w-full sm:w-auto">
+                  <span className="inline-block px-3 py-1 bg-slate-900 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-md mb-2">
+                    Tax Invoice
+                  </span>
+                  <h2 className="text-xl font-mono font-black text-slate-900">{viewingInvoice.invoiceNumber}</h2>
+                  <div className="mt-2 space-y-0.5 text-xs text-slate-600">
+                    <p>Issue Date: <strong className="text-slate-900">{new Date(viewingInvoice.issueDate).toLocaleDateString()}</strong></p>
+                    <p>Due Date: <strong className="text-slate-900">{new Date(viewingInvoice.dueDate).toLocaleDateString()}</strong></p>
+                    <p>
+                      Status:{' '}
+                      <span className={`font-bold ${viewingInvoice.status === 'Paid' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        {viewingInvoice.status}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bill To & Reference */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-xl border border-slate-100 text-xs">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Billed To (Client):</span>
+                  <p className="text-sm font-bold text-slate-900">{viewingInvoice.customerName}</p>
+                  <p className="text-slate-600 mt-0.5">{viewingInvoice.customerAddress || 'Colombo, Sri Lanka'}</p>
+                  <p className="text-slate-600">Phone: <span className="font-semibold text-slate-800">{viewingInvoice.customerPhone || 'N/A'}</span></p>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Invoice Reference:</span>
+                  {viewingInvoice.projectName && <p className="text-slate-700">Project: <strong>{viewingInvoice.projectName}</strong></p>}
+                  {viewingInvoice.items?.[0]?.vehicleReg && (
+                    <p className="text-slate-700">Assigned Vehicle: <strong>{viewingInvoice.items[0].vehicleReg}</strong></p>
+                  )}
+                  <p className="text-slate-700">Currency: <strong>{settings?.currency || 'LKR'} (Rs.)</strong></p>
+                  <p className="text-slate-500 text-[11px] mt-1">Payment Method: Official Direct Bank Deposit / Transfer</p>
+                </div>
+              </div>
+
+              {/* Items Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
+                  <thead className="bg-slate-900 text-white font-bold">
+                    <tr>
+                      <th className="p-3">#</th>
+                      <th className="p-3">Description / Service</th>
+                      <th className="p-3">Vehicle</th>
+                      <th className="p-3 text-right">Qty</th>
+                      <th className="p-3 text-right">Unit Price (Rs.)</th>
+                      <th className="p-3 text-right">Total (Rs.)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {(viewingInvoice.items || []).map((it: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-slate-50/50">
+                        <td className="p-3 text-slate-400 font-mono">{idx + 1}</td>
+                        <td className="p-3 font-semibold text-slate-800">{it.description}</td>
+                        <td className="p-3 font-mono text-slate-600">{it.vehicleReg || 'N/A'}</td>
+                        <td className="p-3 text-right font-medium text-slate-700">{it.quantity}</td>
+                        <td className="p-3 text-right font-medium text-slate-700">Rs. {Number(it.unitPrice || 0).toLocaleString()}</td>
+                        <td className="p-3 text-right font-bold text-slate-900">Rs. {Number(it.total || 0).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Totals Summary */}
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pt-2">
+                <div className="sm:max-w-md w-full bg-slate-50 p-4 rounded-xl border border-slate-100 text-xs space-y-1.5">
+                  <span className="font-bold text-slate-800 block text-[11px] uppercase tracking-wide">
+                    Bank Remittance & Deposit Details:
+                  </span>
+                  <p className="whitespace-pre-line text-slate-600 font-mono text-[11px] leading-relaxed">
+                    {settings?.bankAccountDetails ||
+                      'Commercial Bank of Ceylon\nAccount: 1000987654\nBranch: Nugegoda\nBeneficiary: Transport & Tourism'}
+                  </p>
+                  <p className="text-[10px] text-slate-400 pt-1">
+                    * Please state your invoice number as the payment reference when making deposit or online transfer.
+                  </p>
+                </div>
+
+                <div className="w-full sm:w-72 space-y-2 text-xs">
+                  <div className="flex justify-between py-1 text-slate-600">
+                    <span>Subtotal:</span>
+                    <span className="font-semibold text-slate-900">Rs. {Number(viewingInvoice.subtotal || 0).toLocaleString()}</span>
+                  </div>
+                  {viewingInvoice.taxAmount > 0 && (
+                    <div className="flex justify-between py-1 text-slate-600">
+                      <span>VAT / Tax:</span>
+                      <span className="font-semibold text-slate-900">Rs. {Number(viewingInvoice.taxAmount).toLocaleString()}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between py-1.5 border-t border-slate-200 text-sm font-bold text-slate-900">
+                    <span>Total Amount:</span>
+                    <span>Rs. {Number(viewingInvoice.totalAmount || 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between py-1 text-emerald-600 font-medium">
+                    <span>Amount Paid:</span>
+                    <span>Rs. {Number(viewingInvoice.paidAmount || 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-t-2 border-slate-900 text-base font-black text-rose-600">
+                    <span>Balance Due:</span>
+                    <span>Rs. {Number(viewingInvoice.balanceDue || 0).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Signatures & Stamp */}
+              <div className="grid grid-cols-2 gap-12 pt-10 border-t border-slate-200 text-xs">
+                <div>
+                  <div className="border-b border-dashed border-slate-300 h-10 w-48 mb-2"></div>
+                  <p className="font-bold text-slate-800">Prepared By</p>
+                  <p className="text-slate-400 text-[10px]">Operations & Billing Desk</p>
+                </div>
+                <div className="text-right flex flex-col items-end">
+                  <div className="border-b border-dashed border-slate-300 h-10 w-48 mb-2"></div>
+                  <p className="font-bold text-slate-800">Authorized Signature & Seal</p>
+                  <p className="text-slate-400 text-[10px]">{settings?.companyName || 'Transport & Tourism'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Print Specific CSS to only print the invoice sheet cleanly */}
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #printable-invoice,
+          #printable-invoice * {
+            visibility: visible;
+          }
+          #printable-invoice {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 12px;
+            border: none !important;
+          }
+        }
+      `}</style>
     </DashboardLayout>
   );
 }

@@ -3,10 +3,13 @@ import { connectDB } from '@/lib/db';
 import Invoice from '@/models/Invoice';
 import Customer from '@/models/Customer';
 import CompanySettings from '@/models/CompanySettings';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, requireStaffAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
+    const { errorResponse } = requireStaffAuth(req);
+    if (errorResponse) return errorResponse;
+
     await connectDB();
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || '';
