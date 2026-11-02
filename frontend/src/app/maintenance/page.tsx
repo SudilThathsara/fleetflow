@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import {
   Wrench,
   Plus,
@@ -21,6 +22,7 @@ import {
 import Link from 'next/link';
 
 export default function MaintenancePage() {
+  const { confirmDelete } = useDeleteConfirmation();
   const [services, setServices] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [spareParts, setSpareParts] = useState<any[]>([]);
@@ -211,7 +213,7 @@ export default function MaintenancePage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this maintenance entry?')) return;
+    if (!(await confirmDelete('Are you sure you want to delete this maintenance entry?'))) return;
     try {
       const res = await fetch(`/api/services/${id}`, { method: 'DELETE' });
       const data = await res.json();

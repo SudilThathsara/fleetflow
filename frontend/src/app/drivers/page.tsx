@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import { UserCheck, Plus, Search, Filter, Trash2, Edit2, Phone, CreditCard, X } from 'lucide-react';
 
 export default function DriversPage() {
+  const { confirmDelete } = useDeleteConfirmation();
   const [drivers, setDrivers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -91,7 +93,7 @@ export default function DriversPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete driver ${name}?`)) return;
+    if (!(await confirmDelete(`Are you sure you want to delete driver ${name}?`))) return;
     try {
       const res = await fetch(`/api/drivers/${id}`, { method: 'DELETE' });
       const data = await res.json();

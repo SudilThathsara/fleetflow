@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import {
   Globe,
   Plus,
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function SocialLeadsPage() {
+  const { confirmDelete } = useDeleteConfirmation();
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -115,7 +117,7 @@ export default function SocialLeadsPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete lead ${name}?`)) return;
+    if (!(await confirmDelete(`Are you sure you want to delete lead ${name}?`))) return;
     try {
       const res = await fetch(`/api/social/leads/${id}`, { method: 'DELETE' });
       const data = await res.json();

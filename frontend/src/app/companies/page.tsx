@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import {
   Building2,
   FolderGit2,
@@ -22,6 +23,7 @@ import {
 import Link from 'next/link';
 
 export default function CompaniesAndProjectsPage() {
+  const { confirmDelete } = useDeleteConfirmation();
   const [activeTab, setActiveTab] = useState<'companies' | 'projects'>('companies');
   const [companies, setCompanies] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
@@ -159,7 +161,7 @@ export default function CompaniesAndProjectsPage() {
   };
 
   const handleDeleteCompany = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this customer company?')) return;
+    if (!(await confirmDelete('Are you sure you want to delete this customer company?'))) return;
     try {
       const res = await fetch(`/api/companies/${id}`, { method: 'DELETE' });
       const data = await res.json();
@@ -249,7 +251,7 @@ export default function CompaniesAndProjectsPage() {
   };
 
   const handleDeleteProject = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
+    if (!(await confirmDelete('Are you sure you want to delete this project?'))) return;
     try {
       const res = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
       const data = await res.json();

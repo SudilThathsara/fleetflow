@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import { FileText, Plus, AlertTriangle, CheckCircle, Trash2, X } from 'lucide-react';
 
 export default function DocumentsPage() {
+  const { confirmDelete } = useDeleteConfirmation();
   const [documents, setDocuments] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [drivers, setDrivers] = useState<any[]>([]);
@@ -66,7 +68,7 @@ export default function DocumentsPage() {
   };
 
   const handleDelete = async (id: string, docId: string) => {
-    if (!confirm(`Are you sure you want to remove document record ${docId}?`)) return;
+    if (!(await confirmDelete(`Are you sure you want to remove document record ${docId}?`))) return;
     try {
       const res = await fetch(`/api/documents/${id}`, { method: 'DELETE' });
       const data = await res.json();

@@ -2,11 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import { FileCheck2, Plus, Search, Trash2, Edit2, FileDown, CheckCircle, ArrowRight, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export default function QuotationsPage() {
+  const { confirmDelete } = useDeleteConfirmation();
   const [quotations, setQuotations] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,7 +101,7 @@ export default function QuotationsPage() {
   };
 
   const handleDelete = async (id: string, qNum: string) => {
-    if (!confirm(`Are you sure you want to delete quotation ${qNum}?`)) return;
+    if (!(await confirmDelete(`Are you sure you want to delete quotation ${qNum}?`))) return;
     try {
       const res = await fetch(`/api/quotations/${id}`, { method: 'DELETE' });
       const data = await res.json();

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import {
   FileSpreadsheet,
   Plus,
@@ -21,6 +22,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export default function RunningChartsPage() {
+  const { confirmDelete } = useDeleteConfirmation();
   const [monthYear, setMonthYear] = useState('2026-10');
   const [entries, setEntries] = useState<any[]>([]);
   const [summary, setSummary] = useState<any>(null);
@@ -135,7 +137,7 @@ export default function RunningChartsPage() {
   };
 
   const handleDelete = async (id: string, entryId: string) => {
-    if (!confirm(`Are you sure you want to delete running chart entry ${entryId}?`)) return;
+    if (!(await confirmDelete(`Are you sure you want to delete running chart entry ${entryId}?`))) return;
     try {
       const res = await fetch(`/api/running-charts/${id}`, { method: 'DELETE' });
       const data = await res.json();
