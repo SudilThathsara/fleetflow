@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { DynamicBrandingHead } from '@/components/layout/DynamicBrandingHead';
+import { DeleteConfirmationProvider } from '@/components/layout/DeleteConfirmation';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -41,7 +42,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 text-slate-900`}>
         <DynamicBrandingHead />
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <DeleteConfirmationProvider>{children}</DeleteConfirmationProvider>
+        </AuthProvider>
       </body>
     </html>
   );

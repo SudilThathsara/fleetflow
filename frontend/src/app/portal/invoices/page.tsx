@@ -22,7 +22,7 @@ export default function CustomerInvoicesPage() {
   const [loading, setLoading] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
   const [bankDetails, setBankDetails] = useState('');
-  const [settings, setSettings] = useState<any>(null);
+  const [settings, setSettings] = useState<any>({});
 
   useEffect(() => {
     fetch('/api/portal/invoices')
@@ -41,9 +41,7 @@ export default function CustomerInvoicesPage() {
       .then((data) => {
         if (data.success && data.data) {
           setSettings(data.data);
-          if (data.data.bankAccountDetails) {
-            setBankDetails(data.data.bankAccountDetails);
-          }
+          setBankDetails(data.data.bankAccountDetails || '');
         }
       })
       .catch(() => {});
@@ -133,8 +131,7 @@ export default function CustomerInvoicesPage() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     const bLines = doc.splitTextToSize(
-      bankDetails ||
-        'Commercial Bank of Ceylon\nAccount: 1000987654\nBranch: Nugegoda\nBeneficiary: Lanka Premier Transport (Pvt) Ltd',
+      bankDetails || settings.bankAccountDetails || 'Payment details available from the operations team.',
       180
     );
     doc.text(bLines, 14, finalY + 40);

@@ -106,6 +106,10 @@ export const PublicHeader: React.FC = () => {
           businessName: e.detail.companyName || prev.businessName,
           tagline: e.detail.tagline || prev.tagline,
           logoUrl: e.detail.logoUrl !== undefined ? e.detail.logoUrl : prev.logoUrl,
+          phone: e.detail.phone || prev.phone,
+          whatsappNumber: e.detail.whatsappNumber || prev.whatsappNumber,
+          businessHours: e.detail.businessHours || prev.businessHours,
+          servicesEnabled: e.detail.servicesEnabled || prev.servicesEnabled,
         }));
       }
     };
@@ -151,10 +155,10 @@ export const PublicHeader: React.FC = () => {
 
   const navLinks: NavItem[] = [
     { name: 'Home', href: '/' },
-    { name: 'About Us', href: '/about' },
+    { name: 'About', href: '/about' },
     { name: 'Services', href: '/services', subItems: serviceSubItems },
     { name: 'Corporate Transport', href: '/corporate-transport' },
-    { name: 'Our Fleet', href: '/fleet' },
+    { name: 'Vehicles', href: '/fleet' },
     { name: 'FAQ', href: '/faq' },
     { name: 'Contact', href: '/contact' },
   ];

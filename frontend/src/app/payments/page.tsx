@@ -10,6 +10,7 @@ export default function PaymentsPage() {
   const [payments, setPayments] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [companySettings, setCompanySettings] = useState<any>({});
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,6 +33,9 @@ export default function PaymentsPage() {
       const [pData, iData] = await Promise.all([pRes.json(), iRes.json()]);
       if (pData.success) setPayments(pData.data);
       if (iData.success) setInvoices(iData.data);
+      const settingsRes = await fetch('/api/settings', { cache: 'no-store' });
+      const settingsData = await settingsRes.json();
+      if (settingsData.success) setCompanySettings(settingsData.data || {});
     } catch (err) {
       console.error(err);
     } finally {
@@ -86,12 +90,12 @@ export default function PaymentsPage() {
 
     doc.setFontSize(20);
     doc.setTextColor(15, 23, 42);
-    doc.text('FleetFlow Lanka (Pvt) Ltd', 14, 20);
+    doc.text(companySettings.companyName || 'FleetFlow Lanka (Pvt) Ltd', 14, 20);
 
     doc.setFontSize(9);
     doc.setTextColor(100);
-    doc.text('Official Payment Receipt', 14, 26);
-    doc.text('No 142/B, High Level Road, Nugegoda, Sri Lanka', 14, 31);
+    doc.text(companySettings.tagline || 'Official Payment Receipt', 14, 26);
+    doc.text(companySettings.address || 'No 142/B, High Level Road, Nugegoda, Sri Lanka', 14, 31);
 
     doc.setDrawColor(220);
     doc.line(14, 38, 196, 38);
@@ -117,7 +121,7 @@ export default function PaymentsPage() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(120);
-    doc.text('Thank you for your business. Generated securely by FleetFlow Lanka Transport ERP.', 14, 115);
+    doc.text(`Thank you for your business. Generated securely by ${companySettings.companyName || 'FleetFlow Lanka Transport ERP'}.`, 14, 115);
 
     doc.save(`${pay.receiptNumber}.pdf`);
   };

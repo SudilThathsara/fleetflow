@@ -2,11 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import { Receipt, Plus, Search, Trash2, Edit2, FileDown, CheckCircle, Clock, X, Printer } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export default function InvoicesPage() {
+  const { confirmDelete } = useDeleteConfirmation();
   const [invoices, setInvoices] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +63,7 @@ export default function InvoicesPage() {
       ]);
       if (invData.success) setInvoices(invData.data);
       if (custData.success) setCustomers(custData.data);
-      if (settingsData.success && settingsData.data) setSettings(settingsData.data);
+      if (settingsData.success && settingsData.data) setSettings((prev: any) => ({ ...prev, ...settingsData.data }));
     } catch (err) {
       console.error(err);
     } finally {
@@ -113,7 +115,7 @@ export default function InvoicesPage() {
   };
 
   const handleDelete = async (id: string, num: string) => {
-    if (!confirm(`Are you sure you want to delete invoice ${num}?`)) return;
+    if (!(await confirmDelete(`Are you sure you want to delete invoice ${num}?`))) return;
     try {
       const res = await fetch(`/api/invoices/${id}`, { method: 'DELETE' });
       const data = await res.json();
@@ -765,4 +767,3 @@ export default function InvoicesPage() {
     </DashboardLayout>
   );
 }
-

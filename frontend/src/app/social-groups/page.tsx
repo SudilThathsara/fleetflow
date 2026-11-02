@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import { Share2, Plus, ExternalLink, Trash2, Edit2, X, Users } from 'lucide-react';
 
 export default function SocialGroupsPage() {
+  const { confirmDelete } = useDeleteConfirmation();
   const [groups, setGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -71,7 +73,7 @@ export default function SocialGroupsPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to remove group ${name}?`)) return;
+    if (!(await confirmDelete(`Are you sure you want to remove group ${name}?`))) return;
     try {
       const res = await fetch(`/api/social/groups/${id}`, { method: 'DELETE' });
       const data = await res.json();

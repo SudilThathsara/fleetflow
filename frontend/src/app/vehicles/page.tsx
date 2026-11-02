@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import {
   Car,
   Plus,
@@ -58,6 +59,7 @@ const SAMPLE_PHOTO_PRESETS = [
 ];
 
 export default function VehiclesPage() {
+  const { confirmDelete } = useDeleteConfirmation();
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -170,7 +172,7 @@ export default function VehiclesPage() {
   };
 
   const handleDelete = async (id: string, reg: string) => {
-    if (!confirm(`Are you sure you want to delete vehicle ${reg}?`)) return;
+    if (!(await confirmDelete(`Are you sure you want to delete vehicle ${reg}?`))) return;
     try {
       const res = await fetch(`/api/vehicles/${id}`, { method: 'DELETE' });
       const data = await res.json();

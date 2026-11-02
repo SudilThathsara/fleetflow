@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import { DollarSign, Plus, Filter, Trash2, Edit2, X } from 'lucide-react';
 
 export default function ExpensesPage() {
+  const { confirmDelete } = useDeleteConfirmation();
   const [expenses, setExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -75,7 +77,7 @@ export default function ExpensesPage() {
   };
 
   const handleDelete = async (id: string, expId: string) => {
-    if (!confirm(`Are you sure you want to delete expense ${expId}?`)) return;
+    if (!(await confirmDelete(`Are you sure you want to delete expense ${expId}?`))) return;
     try {
       const res = await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
       const data = await res.json();

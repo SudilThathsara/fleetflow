@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db';
 import Payment from '@/models/Payment';
 import Invoice from '@/models/Invoice';
 import Customer from '@/models/Customer';
+import CompanySettings from '@/models/CompanySettings';
 import { requireAuth, requireStaffAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
@@ -36,7 +37,8 @@ export async function POST(req: NextRequest) {
 
     if (!body.receiptNumber) {
       const count = await Payment.countDocuments();
-      body.receiptNumber = `REC-${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
+      const settings = await CompanySettings.findOne();
+      body.receiptNumber = `${settings?.receiptPrefix || `REC-${new Date().getFullYear()}-`}${String(count + 1).padStart(4, '0')}`;
     }
 
     const payAmount = Number(body.amount) || 0;

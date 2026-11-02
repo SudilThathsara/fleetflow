@@ -161,23 +161,37 @@ export default function SettingsPage() {
       // Sync logoUrl and branding to WebsiteContent so public site always receives the updated logo
       const websitePayload = {
         ...wc,
-        logoUrl: settings.logoUrl || wc.logoUrl,
+        logoUrl: settings.logoUrl,
         businessName: wc.businessName || settings.companyName,
+      };
+      const settingsPayload = {
+        ...settings,
+        companyName: websitePayload.businessName,
+        tagline: websitePayload.tagline,
+        phone: websitePayload.phone,
+        email: websitePayload.publicEmail,
+        address: websitePayload.address,
+        logoUrl: websitePayload.logoUrl,
+        brNumber: websitePayload.brNumberPlaceholder,
       };
 
       const [r1, r2] = await Promise.all([
-        fetch('/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) }),
+        fetch('/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settingsPayload) }),
         fetch('/api/public/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(websitePayload) }),
       ]);
       const d1 = await r1.json();
-      if (d1.success) {
+      const d2 = await r2.json();
+      if (d1.success && d2.success) {
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 4000);
         if (typeof window !== 'undefined') {
-          localStorage.setItem('fleetflow_settings', JSON.stringify(d1.data || settings));
-          window.dispatchEvent(new CustomEvent('fleetflow:settings-updated', { detail: d1.data || settings }));
+          const mergedSettings = { ...(d1.data || settingsPayload), ...websitePayload };
+          localStorage.setItem('fleetflow_settings', JSON.stringify(mergedSettings));
+          window.dispatchEvent(new CustomEvent('fleetflow:settings-updated', { detail: mergedSettings }));
         }
-      } else { setSaveError(d1.message || 'Failed to save settings'); }
+      } else {
+        setSaveError(d1.message || d2.message || 'Failed to save settings');
+      }
     } catch (err: any) { setSaveError(err.message || 'Network error'); }
     finally { setSaving(false); }
   };
@@ -323,19 +337,19 @@ export default function SettingsPage() {
               <SectionCard title="Company Identity" subtitle="Core company information used across all documents and communications." icon={Building}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Registered Company Name">
-                    <Input value={settings.companyName} onChange={(e) => setSettings((p) => ({ ...p, companyName: e.target.value }))} />
+                    <Input value={settings.companyName} onChange={(e) => { const value = e.target.value; setSettings((p) => ({ ...p, companyName: value })); setWc((p) => ({ ...p, businessName: value })); }} />
                   </Field>
                   <Field label="Business Tagline">
-                    <Input value={settings.tagline} onChange={(e) => setSettings((p) => ({ ...p, tagline: e.target.value }))} />
+                    <Input value={settings.tagline} onChange={(e) => { const value = e.target.value; setSettings((p) => ({ ...p, tagline: value })); setWc((p) => ({ ...p, tagline: value })); }} />
                   </Field>
                   <Field label="Contact Phone">
-                    <Input value={settings.phone} onChange={(e) => setSettings((p) => ({ ...p, phone: e.target.value }))} />
+                    <Input value={settings.phone} onChange={(e) => { const value = e.target.value; setSettings((p) => ({ ...p, phone: value })); setWc((p) => ({ ...p, phone: value })); }} />
                   </Field>
                   <Field label="Email Address">
-                    <Input type="email" value={settings.email} onChange={(e) => setSettings((p) => ({ ...p, email: e.target.value }))} />
+                    <Input type="email" value={settings.email} onChange={(e) => { const value = e.target.value; setSettings((p) => ({ ...p, email: value })); setWc((p) => ({ ...p, publicEmail: value })); }} />
                   </Field>
                   <Field label="BR / Business Registration Number">
-                    <Input value={settings.brNumber} onChange={(e) => setSettings((p) => ({ ...p, brNumber: e.target.value }))} />
+                    <Input value={settings.brNumber} onChange={(e) => { const value = e.target.value; setSettings((p) => ({ ...p, brNumber: value })); setWc((p) => ({ ...p, brNumberPlaceholder: value })); }} />
                   </Field>
                   <Field label="VAT Registration Number">
                     <Input value={settings.vatNumber} onChange={(e) => setSettings((p) => ({ ...p, vatNumber: e.target.value }))} />
@@ -454,10 +468,10 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <SectionCard title="Homepage Hero Section" subtitle="The first thing visitors see — make it compelling." icon={Globe}>
                     <Field label="Public Business Trading Name">
-                      <Input value={wc.businessName} onChange={(e) => wcSet('businessName', e.target.value)} />
+                      <Input value={wc.businessName} onChange={(e) => { const value = e.target.value; wcSet('businessName', value); setSettings((p) => ({ ...p, companyName: value })); }} />
                     </Field>
                     <Field label="Business Tagline (shown under logo in header/footer)">
-                      <Input value={wc.tagline} onChange={(e) => wcSet('tagline', e.target.value)} />
+                      <Input value={wc.tagline} onChange={(e) => { const value = e.target.value; wcSet('tagline', value); setSettings((p) => ({ ...p, tagline: value })); }} />
                     </Field>
                     <Field label="Hero Headline" hint="Short, powerful — max 80 characters">
                       <Input value={wc.heroHeadline} onChange={(e) => wcSet('heroHeadline', e.target.value)} />
@@ -486,20 +500,20 @@ export default function SettingsPage() {
                   <SectionCard title="Contact & Business Information" subtitle="Displayed in the header, footer, contact page, and about page." icon={Phone}>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Field label="Phone Number(s)" hint="Separate multiple numbers with /">
-                        <Input value={wc.phone} onChange={(e) => wcSet('phone', e.target.value)} />
+                        <Input value={wc.phone} onChange={(e) => { const value = e.target.value; wcSet('phone', value); setSettings((p) => ({ ...p, phone: value })); }} />
                       </Field>
                       <Field label="WhatsApp Number" hint="International format e.g. +94771234567">
                         <Input value={wc.whatsappNumber} onChange={(e) => wcSet('whatsappNumber', e.target.value)} />
                       </Field>
                       <Field label="Public Email Address">
-                        <Input type="email" value={wc.publicEmail} onChange={(e) => wcSet('publicEmail', e.target.value)} />
+                        <Input type="email" value={wc.publicEmail} onChange={(e) => { const value = e.target.value; wcSet('publicEmail', value); setSettings((p) => ({ ...p, email: value })); }} />
                       </Field>
                       <Field label="Business Registration / License No.">
-                        <Input value={wc.brNumberPlaceholder} onChange={(e) => wcSet('brNumberPlaceholder', e.target.value)} />
+                        <Input value={wc.brNumberPlaceholder} onChange={(e) => { const value = e.target.value; wcSet('brNumberPlaceholder', value); setSettings((p) => ({ ...p, brNumber: value })); }} />
                       </Field>
                     </div>
                     <Field label="Physical Address">
-                      <Textarea rows={2} value={wc.address} onChange={(e) => wcSet('address', e.target.value)} />
+                      <Textarea rows={2} value={wc.address} onChange={(e) => { const value = e.target.value; wcSet('address', value); setSettings((p) => ({ ...p, address: value })); }} />
                     </Field>
                     <Field label="Business Hours" hint="Shown in header micro-bar">
                       <Input value={wc.businessHours} onChange={(e) => wcSet('businessHours', e.target.value)} />

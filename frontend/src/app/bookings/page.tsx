@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import {
   CalendarDays,
   Plus,
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function BookingsPage() {
+  const { confirmDelete } = useDeleteConfirmation();
   const [bookings, setBookings] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [drivers, setDrivers] = useState<any[]>([]);
@@ -142,7 +144,7 @@ export default function BookingsPage() {
   };
 
   const handleDelete = async (id: string, bId: string) => {
-    if (!confirm(`Are you sure you want to delete booking ${bId}?`)) return;
+    if (!(await confirmDelete(`Are you sure you want to delete booking ${bId}?`))) return;
     try {
       const res = await fetch(`/api/bookings/${id}`, { method: 'DELETE' });
       const data = await res.json();

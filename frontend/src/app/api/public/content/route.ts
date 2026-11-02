@@ -13,21 +13,23 @@ export async function GET() {
       content = await WebsiteContent.create({ siteKey: 'default' });
     }
 
-    // Sync company branding settings if present
+    // Company settings are the single source of truth for shared identity/contact fields.
     const settings = await CompanySettings.findOne();
     if (settings) {
-      if (settings.companyName && !content.businessName) content.businessName = settings.companyName;
-      if (settings.phone && !content.phone) content.phone = settings.phone;
-      if (settings.email && !content.publicEmail) content.publicEmail = settings.email;
-      if (settings.address && !content.address) content.address = settings.address;
-      // Always sync logoUrl from CompanySettings if CompanySettings has a logo,
-      // ensuring the official company logo is used uniformly across the public site.
-      if (settings.logoUrl) {
-        content.logoUrl = settings.logoUrl;
-      }
+      content.businessName = settings.companyName || content.businessName;
+      content.tagline = settings.tagline || content.tagline;
+      content.phone = settings.phone || content.phone;
+      content.publicEmail = settings.email || content.publicEmail;
+      content.address = settings.address || content.address;
+      content.brNumberPlaceholder = settings.brNumber || content.brNumberPlaceholder;
+      content.logoUrl = settings.logoUrl || '';
+      await content.save();
     }
 
-    return NextResponse.json({ success: true, data: content });
+    return NextResponse.json(
+      { success: true, data: content },
+      { headers: { 'Cache-Control': 'no-store, max-age=0' } }
+    );
   } catch (error: any) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
@@ -47,11 +49,31 @@ export async function PUT(req: NextRequest) {
       { new: true, upsert: true }
     );
 
-    return NextResponse.json({
-      success: true,
-      message: 'Website content updated successfully',
-      data: updated,
-    });
+    await CompanySettings.findOneAndUpdate(
+      {},
+      {
+        $set: {
+          ...(body.businessName !== undefined && { companyName: body.businessName }),
+          ...(body.tagline !== undefined && { tagline: body.tagline }),
+          ...(body.phone !== undefined && { phone: body.phone }),
+          ...(body.publicEmail !== undefined && { email: body.publicEmail }),
+          ...(body.address !== undefined && { address: body.address }),
+          ...(body.logoUrl !== undefined && { logoUrl: body.logoUrl }),
+          ...(body.brNumberPlaceholder !== undefined && { brNumber: body.brNumberPlaceholder }),
+        },
+        $setOnInsert: { currency: 'LKR' },
+      },
+      { upsert: true }
+    );
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Website content updated successfully',
+        data: updated,
+      },
+      { headers: { 'Cache-Control': 'no-store, max-age=0' } }
+    );
   } catch (error: any) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }

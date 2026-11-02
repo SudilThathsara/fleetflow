@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import { Building2, Plus, Search, Trash2, Edit2, Phone, X } from 'lucide-react';
 
 export default function SuppliersPage() {
+  const { confirmDelete } = useDeleteConfirmation();
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -72,7 +74,7 @@ export default function SuppliersPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete supplier ${name}?`)) return;
+    if (!(await confirmDelete(`Are you sure you want to delete supplier ${name}?`))) return;
     try {
       const res = await fetch(`/api/suppliers/${id}`, { method: 'DELETE' });
       const data = await res.json();

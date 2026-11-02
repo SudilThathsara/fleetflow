@@ -92,18 +92,17 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           if (parsed.companyName) setCompanyName(parsed.companyName);
           if (parsed.logoUrl !== undefined) setCompanyLogo(parsed.logoUrl);
         } catch {}
-      } else {
-        fetch('/api/settings')
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success && data.data) {
-              if (data.data.companyName) setCompanyName(data.data.companyName);
-              if (data.data.logoUrl) setCompanyLogo(data.data.logoUrl);
-              localStorage.setItem('fleetflow_settings', JSON.stringify(data.data));
-            }
-          })
-          .catch(() => {});
       }
+      fetch('/api/settings', { cache: 'no-store' })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.data) {
+            if (data.data.companyName) setCompanyName(data.data.companyName);
+            setCompanyLogo(data.data.logoUrl || '');
+            localStorage.setItem('fleetflow_settings', JSON.stringify(data.data));
+          }
+        })
+        .catch(() => {});
     }
 
     const handleSettingsUpdate = (e: any) => {

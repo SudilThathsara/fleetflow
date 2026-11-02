@@ -4,6 +4,7 @@ import ContractMonthlyBillingRun from '@/models/ContractMonthlyBillingRun';
 import Invoice from '@/models/Invoice';
 import CustomerCompany from '@/models/CustomerCompany';
 import { requireAuth } from '@/lib/auth';
+import CompanySettings from '@/models/CompanySettings';
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,7 +22,8 @@ export async function POST(req: NextRequest) {
     const billingRunId = `BILL-${calculationData.billingMonth}-${String(runCount + 1).padStart(3, '0')}`;
 
     const invCount = await Invoice.countDocuments();
-    const invoiceNumber = `INV-${calculationData.billingMonth.replace('-', '')}-${String(invCount + 1).padStart(4, '0')}`;
+    const settings = await CompanySettings.findOne();
+    const invoiceNumber = `${settings?.invoicePrefix || `INV-${calculationData.billingMonth.replace('-', '')}-`}${String(invCount + 1).padStart(4, '0')}`;
 
     const invoiceItems = [];
     for (const line of calculationData.vehicleLines) {
@@ -98,7 +100,7 @@ export async function POST(req: NextRequest) {
       paidAmount: 0,
       balanceDue: calculationData.totalAmount,
       status: 'Issued',
-      paymentTerms: 'Payment due within 15 days of invoice date.',
+      paymentTerms: settings?.terms || 'Payment due within 15 days of invoice date.',
     });
 
     const billingRun = await ContractMonthlyBillingRun.create({

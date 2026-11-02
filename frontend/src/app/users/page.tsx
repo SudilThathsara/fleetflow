@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useDeleteConfirmation } from '@/components/layout/DeleteConfirmation';
 import { useAuth } from '@/context/AuthContext';
 import {
   Users,
@@ -21,6 +22,7 @@ import {
 
 export default function UsersPage() {
   const { user, updateUser } = useAuth();
+  const { confirmDelete } = useDeleteConfirmation();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -104,7 +106,7 @@ export default function UsersPage() {
   };
 
   const handleDelete = async (id: string, email: string) => {
-    if (!confirm(`Are you sure you want to delete user ${email}?`)) return;
+    if (!(await confirmDelete(`Are you sure you want to delete user ${email}?`))) return;
     try {
       const res = await fetch(`/api/users/${id}`, {
         method: 'DELETE',
