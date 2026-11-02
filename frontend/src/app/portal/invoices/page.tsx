@@ -21,6 +21,7 @@ export default function CustomerInvoicesPage() {
   const [loading, setLoading] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
   const [bankDetails, setBankDetails] = useState('');
+  const [companySettings, setCompanySettings] = useState<any>({});
 
   useEffect(() => {
     fetch('/api/portal/invoices')
@@ -37,8 +38,9 @@ export default function CustomerInvoicesPage() {
     fetch('/api/settings')
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && data.data?.bankAccountDetails) {
-          setBankDetails(data.data.bankAccountDetails);
+        if (data.success && data.data) {
+          setCompanySettings(data.data);
+          setBankDetails(data.data.bankAccountDetails || '');
         }
       })
       .catch(() => {});
@@ -50,12 +52,12 @@ export default function CustomerInvoicesPage() {
     // Header
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('Lanka Premier Transport & Vehicle Hire', 14, 20);
+    doc.text(companySettings.companyName || 'Lanka Premier Transport & Vehicle Hire', 14, 20);
 
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('Enterprise Vehicle Fleet & Transport Operations Management', 14, 26);
-    doc.text('No. 142/B, High Level Road, Nugegoda, Sri Lanka | Phone: +94 11 234 5678', 14, 31);
+    doc.text(companySettings.tagline || 'Enterprise Vehicle Fleet & Transport Operations Management', 14, 26);
+    doc.text(`${companySettings.address || 'No. 142/B, High Level Road, Nugegoda, Sri Lanka'} | Phone: ${companySettings.phone || '+94 11 234 5678'}`, 14, 31);
 
     doc.setDrawColor(200, 200, 200);
     doc.line(14, 35, 196, 35);
@@ -114,8 +116,7 @@ export default function CustomerInvoicesPage() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     const bLines = doc.splitTextToSize(
-      bankDetails ||
-        'Commercial Bank of Ceylon\nAccount: 1000987654\nBranch: Nugegoda\nBeneficiary: Lanka Premier Transport (Pvt) Ltd',
+      bankDetails || companySettings.bankAccountDetails || 'Payment details available from the operations team.',
       180
     );
     doc.text(bLines, 14, finalY + 40);

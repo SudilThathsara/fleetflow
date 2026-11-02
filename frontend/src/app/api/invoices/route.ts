@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Invoice from '@/models/Invoice';
 import Customer from '@/models/Customer';
+import CompanySettings from '@/models/CompanySettings';
 import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
@@ -38,7 +39,8 @@ export async function POST(req: NextRequest) {
 
     if (!body.invoiceNumber) {
       const count = await Invoice.countDocuments();
-      body.invoiceNumber = `INV-${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
+      const settings = await CompanySettings.findOne();
+      body.invoiceNumber = `${settings?.invoicePrefix || `INV-${new Date().getFullYear()}-`}${String(count + 1).padStart(4, '0')}`;
     }
 
     if (body.items && Array.isArray(body.items)) {

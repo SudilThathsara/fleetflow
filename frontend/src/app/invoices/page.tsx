@@ -11,6 +11,7 @@ export default function InvoicesPage() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [companySettings, setCompanySettings] = useState<any>({});
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,6 +42,9 @@ export default function InvoicesPage() {
       const [invData, custData] = await Promise.all([invRes.json(), custRes.json()]);
       if (invData.success) setInvoices(invData.data);
       if (custData.success) setCustomers(custData.data);
+      const settingsRes = await fetch('/api/settings', { cache: 'no-store' });
+      const settingsData = await settingsRes.json();
+      if (settingsData.success) setCompanySettings(settingsData.data || {});
     } catch (err) {
       console.error(err);
     } finally {
@@ -158,13 +162,13 @@ export default function InvoicesPage() {
     // Brand Header
     doc.setFontSize(20);
     doc.setTextColor(15, 23, 42); // slate-900
-    doc.text('FleetFlow Lanka (Pvt) Ltd', 14, 20);
+    doc.text(companySettings.companyName || 'FleetFlow Lanka (Pvt) Ltd', 14, 20);
 
     doc.setFontSize(9);
     doc.setTextColor(100);
-    doc.text('Enterprise Transport Operations & Fleet Management', 14, 26);
-    doc.text('No 142/B, High Level Road, Nugegoda, Sri Lanka', 14, 31);
-    doc.text('Tel: +94 11 234 5678 | Email: billing@fleetflowlanka.lk', 14, 36);
+    doc.text(companySettings.tagline || 'Enterprise Transport Operations & Fleet Management', 14, 26);
+    doc.text(companySettings.address || 'No 142/B, High Level Road, Nugegoda, Sri Lanka', 14, 31);
+    doc.text(`Tel: ${companySettings.phone || '+94 11 234 5678'} | Email: ${companySettings.email || 'billing@fleetflowlanka.lk'}`, 14, 36);
 
     doc.setDrawColor(220);
     doc.line(14, 42, 196, 42);
@@ -215,7 +219,9 @@ export default function InvoicesPage() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(120);
-    doc.text('Payment is due within 30 days. Commercial Bank AC: 1000987654 (FleetFlow Lanka)', 14, finalY + 25);
+    const terms = companySettings.terms || 'Payment is due within 30 days.';
+    const bankDetails = companySettings.bankAccountDetails || '';
+    doc.text(`${terms}${bankDetails ? ` ${bankDetails.replace(/\n/g, ' | ')}` : ''}`, 14, finalY + 25);
 
     doc.save(`${inv.invoiceNumber}.pdf`);
   };

@@ -11,6 +11,7 @@ export default function QuotationsPage() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [companySettings, setCompanySettings] = useState<any>({});
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,6 +43,9 @@ export default function QuotationsPage() {
       const [qData, cData] = await Promise.all([qRes.json(), cRes.json()]);
       if (qData.success) setQuotations(qData.data);
       if (cData.success) setCustomers(cData.data);
+      const settingsRes = await fetch('/api/settings', { cache: 'no-store' });
+      const settingsData = await settingsRes.json();
+      if (settingsData.success) setCompanySettings(settingsData.data || {});
     } catch (err) {
       console.error(err);
     } finally {
@@ -162,12 +166,12 @@ export default function QuotationsPage() {
 
     doc.setFontSize(20);
     doc.setTextColor(15, 23, 42);
-    doc.text('FleetFlow Lanka (Pvt) Ltd', 14, 20);
+    doc.text(companySettings.companyName || 'FleetFlow Lanka (Pvt) Ltd', 14, 20);
 
     doc.setFontSize(9);
     doc.setTextColor(100);
-    doc.text('Transport Quotation & Hire Estimate', 14, 26);
-    doc.text('No 142/B, High Level Road, Nugegoda, Sri Lanka | +94 11 234 5678', 14, 31);
+    doc.text(companySettings.tagline || 'Transport Quotation & Hire Estimate', 14, 26);
+    doc.text(`${companySettings.address || 'No 142/B, High Level Road, Nugegoda, Sri Lanka'} | ${companySettings.phone || '+94 11 234 5678'}`, 14, 31);
 
     doc.setDrawColor(220);
     doc.line(14, 38, 196, 38);
@@ -209,7 +213,7 @@ export default function QuotationsPage() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(120);
-    doc.text(`Terms & Conditions:\n${q.terms || 'Valid for 14 days from issue date.'}`, 14, finalY + 25);
+    doc.text(`Terms & Conditions:\n${q.terms || companySettings.terms || 'Valid for 14 days from issue date.'}`, 14, finalY + 25);
 
     doc.save(`${q.quotationNumber}.pdf`);
   };

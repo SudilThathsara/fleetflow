@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Quotation from '@/models/Quotation';
+import CompanySettings from '@/models/CompanySettings';
 import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
@@ -37,7 +38,8 @@ export async function POST(req: NextRequest) {
 
     if (!body.quotationNumber) {
       const count = await Quotation.countDocuments();
-      body.quotationNumber = `QT-${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
+      const settings = await CompanySettings.findOne();
+      body.quotationNumber = `${settings?.quotationPrefix || `QT-${new Date().getFullYear()}-`}${String(count + 1).padStart(4, '0')}`;
     }
 
     if (body.items && Array.isArray(body.items)) {

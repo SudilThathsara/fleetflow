@@ -68,6 +68,14 @@ export const PublicFooter: React.FC = () => {
           businessName: e.detail.companyName || prev.businessName,
           tagline: e.detail.tagline || prev.tagline,
           logoUrl: e.detail.logoUrl !== undefined ? e.detail.logoUrl : prev.logoUrl,
+          phone: e.detail.phone || prev.phone,
+          whatsappNumber: e.detail.whatsappNumber || prev.whatsappNumber,
+          publicEmail: e.detail.publicEmail || prev.publicEmail,
+          address: e.detail.address || prev.address,
+          businessHours: e.detail.businessHours || prev.businessHours,
+          brNumberPlaceholder: e.detail.brNumberPlaceholder || prev.brNumberPlaceholder,
+          socialLinks: e.detail.socialLinks || prev.socialLinks,
+          servicesEnabled: e.detail.servicesEnabled || prev.servicesEnabled,
         }));
       }
     };
