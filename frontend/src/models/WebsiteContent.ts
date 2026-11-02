@@ -61,8 +61,8 @@ export interface IWebsiteContent extends Document {
 const WebsiteContentSchema = new Schema<IWebsiteContent>(
   {
     siteKey: { type: String, default: 'default', unique: true },
-    businessName: { type: String, default: 'Lanka Premier Transport & Vehicle Hire' },
-    tagline: { type: String, default: 'Reliable Vehicle Hire & Corporate Transport Solutions in Sri Lanka' },
+    businessName: { type: String, default: 'Tourism & Transport' },
+    tagline: { type: String, default: 'Professional Fleet & Operational Management' },
     logoUrl: { type: String, default: '' },
     faviconUrl: { type: String, default: '' },
     heroHeadline: { type: String, default: 'Reliable Vehicle Hire & Corporate Transport Solutions' },

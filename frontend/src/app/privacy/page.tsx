@@ -27,7 +27,7 @@ For privacy-related enquiries, please contact our operations team.`;
 
 export default function PrivacyPage() {
   const [text, setText] = useState(DEFAULT_TEXT);
-  const [businessName, setBusinessName] = useState('Lanka Premier Transport');
+  const [businessName, setBusinessName] = useState('Tourism & Transport');
   const [updatedAt, setUpdatedAt] = useState('');
 
   useEffect(() => {
@@ -49,19 +49,19 @@ export default function PrivacyPage() {
 
       {/* Hero */}
       <section className="bg-slate-900 text-white py-12 sm:py-14">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 text-slate-400 text-xs mb-4">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
+          <div className="flex items-center justify-center gap-2 text-slate-400 text-xs mb-4">
             <Link href="/" className="hover:text-white transition flex items-center gap-1"><ArrowLeft size={12} /> Home</Link>
             <span>/</span>
             <span className="text-slate-300">Privacy Policy</span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-sky-600/20 border border-sky-600/30 flex items-center justify-center">
-              <Shield size={20} className="text-sky-400" />
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-sky-600/20 border border-sky-600/30 flex items-center justify-center">
+              <Shield size={24} className="text-sky-400" />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Privacy Policy</h1>
-              <p className="text-xs text-slate-400 mt-0.5">{businessName}{updatedAt && ` · Last updated ${updatedAt}`}</p>
+              <p className="text-xs text-slate-400 mt-1">{businessName}{updatedAt && ` · Last updated ${updatedAt}`}</p>
             </div>
           </div>
         </div>

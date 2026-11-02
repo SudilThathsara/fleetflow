@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     // 3. Create Welcome Notification
     await Notification.create({
       recipientUser: newUser._id,
-      title: 'Welcome to Lanka Premier Transport!',
+      title: 'Welcome to Tourism & Transport!',
       message: 'Your customer portal account is ready. You can request quotations, track vehicle hires, and view invoices.',
       type: 'enquiry',
       link: '/portal',
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
     
     await sendEmail({
       to: cleanEmail,
-      subject: 'Verify Your Customer Account — Lanka Premier Transport',
+      subject: 'Verify Your Customer Account — Tourism & Transport',
       html: getVerificationEmailHtml(name.trim(), verifyUrl),
       type: 'verification',
     });

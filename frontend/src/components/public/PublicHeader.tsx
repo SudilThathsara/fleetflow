@@ -27,8 +27,8 @@ interface BrandingData {
 }
 
 const DEFAULTS: BrandingData = {
-  businessName: 'Lanka Premier Transport',
-  tagline: 'Vehicle Hire & Corporate Fleet Solutions',
+  businessName: 'Tourism & Transport',
+  tagline: 'Professional Fleet & Operational Management',
   logoUrl: '',
   phone: '+94 11 234 5678',
   whatsappNumber: '+94771234567',

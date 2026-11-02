@@ -77,7 +77,7 @@ export function getVerificationEmailHtml(name: string, verifyUrl: string): strin
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff;">
       <div style="text-align: center; margin-bottom: 24px;">
         <h2 style="color: #0f172a; margin: 0;">Verify Your Email Address</h2>
-        <p style="color: #64748b; font-size: 14px;">Welcome to Lanka Premier Transport & Vehicle Hire</p>
+        <p style="color: #64748b; font-size: 14px;">Welcome to Tourism & Transport</p>
       </div>
       <p>Hello <strong>${name}</strong>,</p>
       <p>Thank you for registering your customer portal account. Please verify your email address to activate your quotation and booking access:</p>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -43,7 +44,7 @@ export default function ContactPage() {
       .catch(() => {});
   }, []);
 
-  const businessName = content?.businessName || 'Lanka Premier Transport & Vehicle Hire';
+  const businessName = content?.businessName || 'Tourism & Transport';
   const phone = content?.phone || '+94 11 234 5678 / +94 77 123 4567';
   const whatsappNumber = content?.whatsappNumber || '+94771234567';
   const publicEmail = content?.publicEmail || 'inquiries@transportlanka.lk';
@@ -95,12 +96,12 @@ export default function ContactPage() {
       {/* Banner */}
       <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-sky-950 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl space-y-3">
+          <div className="max-w-3xl mx-auto text-center space-y-3 flex flex-col items-center">
             <span className="text-xs font-bold text-sky-400 uppercase tracking-wider bg-sky-950 px-3 py-1 rounded-full border border-sky-800">
               Customer Desk & Dispatch
             </span>
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight">Contact Us</h1>
-            <p className="text-sm text-slate-300 leading-relaxed">
+            <p className="text-sm text-slate-300 leading-relaxed max-w-2xl">
               Reach out to our operations control center for vehicle quotations, immediate bookings, or corporate transport SLA consultations.
             </p>
           </div>

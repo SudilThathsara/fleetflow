@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -13,8 +13,8 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [branding, setBranding] = useState({
-    companyName: 'Lanka Premier Transport',
-    tagline: 'Reliable Vehicle Hire & Corporate Fleet Solutions',
+    companyName: 'Tourism & Transport',
+    tagline: 'Professional Fleet & Operational Management',
     logoUrl: '',
   });
   const { login } = useAuth();

@@ -55,14 +55,14 @@ export default function PublicFleetPage() {
       {/* Banner */}
       <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-sky-950 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl space-y-3">
+          <div className="max-w-3xl mx-auto text-center space-y-3 flex flex-col items-center">
             <span className="text-xs font-bold text-sky-400 uppercase tracking-wider bg-sky-950 px-3 py-1 rounded-full border border-sky-800">
               Fleet Catalogue
             </span>
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
               Our Approved Vehicle Fleet
             </h1>
-            <p className="text-sm text-slate-300 leading-relaxed">
+            <p className="text-sm text-slate-300 leading-relaxed max-w-2xl">
               Explore vehicle models approved for public hire, seating capacities, and service categories. All vehicles undergo scheduled preventative maintenance and safety fitness verifications.
             </p>
           </div>

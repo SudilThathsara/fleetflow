@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
     const summary = `<strong>Request Reference:</strong> ${requestId}<br/><strong>Service:</strong> ${serviceCategory}<br/><strong>Vehicle Category:</strong> ${vehicleCategory} (${numberOfVehicles || 1} unit/s)<br/><strong>Hire Type:</strong> ${hireType || 'Monthly'}<br/><strong>Start Date:</strong> ${new Date(startDate).toLocaleDateString()}<br/><strong>Service Area:</strong> ${serviceArea}`;
     await sendEmail({
       to: email.trim(),
-      subject: `Quotation Request Confirmed (${requestId}) — Lanka Premier Transport`,
+      subject: `Quotation Request Confirmed (${requestId}) — Tourism & Transport`,
       html: getEnquiryReceivedHtml(name, requestId, summary),
       type: 'enquiry_received',
     });
